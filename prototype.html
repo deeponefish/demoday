@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>点点推荐可信度优化 · 原型 v2</title>
+<title>点点推荐可信度优化 · 原型 v3</title>
 <style>
   body {
     --canvas: #e9eaee;
@@ -24,8 +24,6 @@
     --green-bg: #e9f8f0;
     --yellow: #a87a00;
     --yellow-bg: #fff5d6;
-    --coop-bg: #fffbea;
-    --coop-line: #f3e3a6;
     --low: #e03131;
     --low-bg: #fff0f0;
     --gray: #8a8a8a;
@@ -52,8 +50,6 @@
     --green-bg: rgba(52, 199, 123, .14);
     --yellow: #e8b938;
     --yellow-bg: rgba(232, 185, 56, .14);
-    --coop-bg: #25221a;
-    --coop-line: #4a4126;
     --low: #ff6b6b;
     --low-bg: rgba(255, 107, 107, .14);
     --gray: #9a9a9f;
@@ -112,23 +108,7 @@
   .pref-bar span { flex: 1; }
   .pref-bar em { font-style: normal; color: var(--red); flex-shrink: 0; }
 
-  .filter-row { position: relative; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
-  .filter-chip { display: flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--card); color: var(--text-2); border-radius: 14px; padding: 4px 11px 4px 9px; font-size: 12.5px; cursor: pointer; }
-  .filter-chip .box { width: 13px; height: 13px; border: 1.5px solid var(--text-3); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #fff; }
-  .filter-chip.on { border-color: var(--green); color: var(--green); background: var(--green-bg); }
-  .filter-chip.on .box { background: var(--green); border-color: var(--green); }
-  .q-btn { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--text-3); background: none; color: var(--text-3); font-size: 11px; cursor: pointer; line-height: 16px; }
-  .tip { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: var(--tip-bg); color: #fff; font-size: 12px; line-height: 1.55; padding: 9px 11px; border-radius: 8px; z-index: 5; display: none; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
-  .tip::before { content: ""; position: absolute; top: -5px; left: 150px; border: 5px solid transparent; border-top: none; border-bottom-color: var(--tip-bg); }
-  .tip.show { display: block; }
-  .filter-note { font-size: 11.5px; color: var(--text-3); margin: -4px 0 10px; }
-
-  .empty { text-align: center; padding: 26px 10px; color: var(--text-3); font-size: 13px; border: 1px dashed var(--line); border-radius: 14px; margin-bottom: 10px; }
-  .empty div { font-size: 28px; margin-bottom: 6px; }
-  .empty button { margin-top: 10px; border: 1px solid var(--red); color: var(--red); background: none; border-radius: 14px; padding: 4px 14px; font-size: 12.5px; cursor: pointer; }
-
-  .rec { border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 10px; background: var(--card); }
-  .rec.is-coop { background: var(--coop-bg); border-color: var(--coop-line); }
+  .rec { position: relative; border: 1px solid var(--line); border-radius: 14px; padding: 26px 12px 12px; margin-bottom: 10px; background: var(--card); }
   .rec-top { display: flex; gap: 10px; }
   .rec-thumb { width: 54px; height: 54px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 25px; }
   .rec-body { flex: 1; min-width: 0; }
@@ -150,7 +130,6 @@
   .meta-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
   .mt { font-size: 11px; color: var(--text-2); background: var(--chip); border-radius: 5px; padding: 2px 6px; border: none; line-height: 1.5; }
   .mt.stale { color: var(--stale); background: var(--stale-bg); }
-  .mt.coop { color: var(--yellow); background: var(--yellow-bg); }
   .mt.good { color: var(--green); background: var(--green-bg); }
   .mt.bad { color: var(--low); background: var(--low-bg); cursor: pointer; }
   .mt.bad em { font-style: normal; display: inline-block; transition: transform .2s; }
@@ -280,7 +259,7 @@
   .note-scroll { flex: 1; overflow-y: auto; background: var(--card); scrollbar-width: none; }
   .note-scroll::-webkit-scrollbar { display: none; }
   .note-big { height: 300px; display: flex; align-items: center; justify-content: center; font-size: 84px; position: relative; }
-  .coop-banner { position: absolute; left: 12px; top: 12px; font-size: 11.5px; background: rgba(0,0,0,.5); color: #fff; padding: 3px 8px; border-radius: 6px; }
+  .ctx-bar { font-size: 11.5px; color: var(--text-3); background: var(--card); padding: 0 16px 8px; display: flex; align-items: center; gap: 6px; }
   .note-content { padding: 14px 16px; }
   .n-title { font-size: 17px; font-weight: 700; line-height: 1.45; }
   .n-body { font-size: 14.5px; line-height: 1.75; margin-top: 8px; }
@@ -301,6 +280,8 @@
   .phone.open-mask2 .mask2 { opacity: 1; pointer-events: auto; }
   .sheet-users { z-index: 13; max-height: 80%; }
   .layer-fresh { z-index: 25; }
+  .layer-user { z-index: 21; }
+  .layer-note { z-index: 22; }
 
   .trust-inline.clickable { border: none; cursor: pointer; font-family: inherit; padding: 2px 8px; font-size: 11.5px; box-shadow: inset 0 0 0 1px currentColor; }
   .trust-inline.clickable b { font-weight: 700; margin-left: 1px; }
@@ -387,6 +368,73 @@
   .advice .h { font-size: 12px; opacity: .9; }
   .advice .t { font-size: 15px; font-weight: 600; line-height: 1.5; margin-top: 6px; }
 
+  /* ---------- v3.0：来源角标 / 验证面板 / 交叉验证提示 / 用户主页 ---------- */
+  .src-tag { display: inline-flex; align-items: center; font-size: 10.5px; line-height: 1.5; color: var(--text-2); background: var(--gray-bg); border: none; border-radius: 4px; padding: 1px 6px; white-space: nowrap; font-family: inherit; flex-shrink: 0; }
+  button.src-tag { cursor: pointer; }
+  .src-tag.corner { position: absolute; top: 0; right: 0; border-radius: 0 13px 0 8px; padding: 3px 9px; font-size: 11px; }
+  .src-tag.flash { animation: tagFlash .5s ease-out; }
+  @keyframes tagFlash { 0% { background: var(--line); transform: scale(.94); } 100% { background: var(--gray-bg); transform: none; } }
+
+  .rec-notes { margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--line-2); }
+  .rn-h { font-size: 11.5px; color: var(--text-3); margin-bottom: 2px; }
+  .rn { display: flex; align-items: center; gap: 6px; padding: 5px 0; font-size: 12.5px; cursor: pointer; transition: transform .12s ease; }
+  .rn .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rn .chev { font-size: 14px; }
+  .rn.gone { color: var(--text-3); cursor: default; }
+
+  .vp { margin-top: 10px; border-radius: 10px; background: var(--chip); }
+  .vp-h { display: flex; align-items: center; gap: 6px; width: 100%; border: none; background: none; padding: 9px 10px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; text-align: left; }
+  .vp-h span { flex: 1; }
+  .vp-h em { font-style: normal; color: var(--text-3); font-size: 11px; transition: transform .25s ease; }
+  .vp.open .vp-h em { transform: rotate(180deg); }
+  .vp-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s cubic-bezier(.2,.8,.2,1); }
+  .vp.open .vp-wrap { grid-template-rows: 1fr; }
+  .vp-in { overflow: hidden; min-height: 0; }
+  .vp-body { padding: 0 10px 10px; }
+  .vd { display: flex; gap: 9px; padding: 9px 0; border-top: 1px solid var(--line); }
+  .vd-ic { width: 28px; height: 28px; border-radius: 8px; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .vd-main { flex: 1; min-width: 0; }
+  .vd-top { display: flex; align-items: baseline; gap: 6px; font-size: 12.5px; font-weight: 600; }
+  .vd-top small { font-size: 10.5px; color: var(--text-3); font-weight: 400; }
+  .vd-top .v { margin-left: auto; font-size: 12.5px; }
+  .vd-bar { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; margin-top: 5px; }
+  .vd-bar b { display: block; height: 100%; background: var(--red); border-radius: 2px; animation: barGrow .7s ease-out; }
+  @keyframes barGrow { from { width: 0; } }
+  .vd-txt { font-size: 12px; color: var(--text-2); margin-top: 4px; line-height: 1.5; }
+  .vd .anchor { margin-top: 2px; }
+  .vp-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid var(--line); }
+  .vp-foot .link { padding: 2px 0; font-size: 12.5px; }
+  .vp-foot .link.sub { color: var(--text-2); }
+  .vp-empty { font-size: 12.5px; color: var(--text-2); line-height: 1.55; padding: 4px 0 10px; }
+  .vp-empty small { display: block; color: var(--text-3); font-size: 11.5px; margin-top: 2px; }
+  .vp-err { font-size: 12.5px; color: var(--low); padding: 4px 0 8px; display: flex; justify-content: space-between; align-items: center; }
+  .skel { height: 10px; border-radius: 5px; margin: 12px 0; background: linear-gradient(90deg, var(--line) 25%, var(--line-2) 50%, var(--line) 75%); background-size: 200% 100%; animation: shimmer 1s linear infinite; }
+  .skel:nth-child(2) { width: 82%; } .skel:nth-child(3) { width: 64%; }
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+  .xv-tip { display: flex; gap: 6px; align-items: flex-start; font-size: 12.5px; color: var(--text-2); line-height: 1.6; background: var(--gray-bg); border-radius: 10px; padding: 9px 11px; margin: 2px 0 10px; }
+  .xv-tip i { font-style: normal; color: var(--text-3); flex-shrink: 0; }
+
+  .u-card.go { cursor: pointer; transition: transform .12s ease, border-color .2s; }
+  .u-card.go:hover { border-color: var(--text-3); }
+  .u-card .chev { font-size: 16px; }
+  .uh-head { background: var(--card); border-radius: 14px; padding: 18px 14px 14px; margin-bottom: 10px; text-align: center; }
+  .uh-head .u-av { width: 56px; height: 56px; font-size: 18px; margin: 0 auto 8px; }
+  .uh-head .nm { font-size: 16px; font-weight: 700; }
+  .uh-head .sub { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+  .uh-stats { display: flex; margin-top: 14px; }
+  .uh-stats div { flex: 1; font-size: 11.5px; color: var(--text-3); }
+  .uh-stats b { display: block; font-size: 15px; color: var(--text); margin-bottom: 2px; }
+  .uh-sec { background: var(--card); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; }
+  .uh-sec .pref-h { margin-bottom: 8px; }
+
+  /* 点击微动效：按下轻微缩小 */
+  button, .src-row, .rn { transition: transform .12s ease; }
+  button:active, .src-row:not(.gone):active, .rn:not(.gone):active, .u-card.go:active { transform: scale(.97); }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+
   /* 在真手机上打开时：去掉机身外框，铺满屏幕 */
   @media (max-width: 500px) {
     .canvas { padding: 0; min-height: 0; display: block; }
@@ -418,17 +466,12 @@
 
         <div class="ai-card">
           <div class="ai-intro">
-            综合了 <b>286 篇</b>相关笔记，挑了几款口碑集中的产品。每条都标出了<b>谁验证过、是不是合作、有没有吐槽</b>，点彩色标签能看到具体依据 👇
+            综合了 <b>286 篇</b>相关笔记和评论区反馈，挑了几款口碑集中的产品。每条都标出了<b>笔记来源是否标注合作</b>，想看验证依据可以展开「这条推荐为什么可信？」👇
           </div>
           <div class="pref-bar" id="prefBar" onclick="openPrefs(this)"></div>
 
-          <div class="filter-row">
-            <button class="filter-chip" id="filterChip" onclick="toggleFilter()"><span class="box">✓</span>只看真实用户体验</button>
-            <button class="q-btn" id="qBtn" onclick="toggleTip(event)">?</button>
-            <div class="tip" id="tip">我们过滤了品牌合作内容和明显营销文案，只保留真实用户的独立体验。</div>
-          </div>
-
           <div id="recList"></div>
+          <div id="xvTip"></div>
 
           <div class="ai-actions">
             <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></div>
@@ -497,7 +540,7 @@
           </div>
           <div class="advice">
             <div class="h">💡 优化建议</div>
-            <div class="t">建议补充「不假滑」和「温和度」维度的真实体验内容</div>
+            <div class="t">建议补充「不假滑」和「温和度」维度的用户体验内容</div>
           </div>
         </div>
         </div>
@@ -507,29 +550,29 @@
 <script>
   /* ================= Mock 数据 ================= */
   const SCENES = ['日常通勤', '运动健身', '约会聚会', '熬夜加班', '旅行出差'];
-  const DEFAULT_PREFS = { skin: '油皮', budget: 100, scenes: ['日常通勤'], acceptCoop: true };
+  const DEFAULT_PREFS = { skin: '油皮', budget: 100, scenes: ['日常通勤'] };
 
   const notes = {
-    a1: { t: '油敏肌空瓶记录｜连用21天闭口变少了', a: '橘子汽水', likes: '2.3k', days: 21, coop: false, complaints: [], e: '🫒', bg: 'linear-gradient(135deg,#e8f5df,#c2e3a8)',
+    a1: { t: '油敏肌空瓶记录｜连用21天闭口变少了', a: '橘子汽水', likes: '2.3k', days: 21, collab_status: 'unmarked', complaints: [], e: '🫒', bg: 'linear-gradient(135deg,#e8f5df,#c2e3a8)',
           body: '混油敏感肌，夏天最怕闷。这瓶用了三周，质地是清爽的啫喱乳，上脸很快吸收，T 区下午也不会油到反光。下巴的闭口少了一大半，没有刺痛泛红。自费买的，不是广告～' },
-    a2: { t: '夏天也不闷！混油T区真实反馈', a: 'Momo不熬夜', likes: '856', days: 14, coop: false, complaints: [['味道有点冲，上脸前几秒有酒精感', 1]], e: '🧴', bg: 'linear-gradient(135deg,#fdf0e1,#f7d1a8)',
+    a2: { t: '夏天也不闷！混油T区真实反馈', a: 'Momo不熬夜', likes: '856', days: 14, collab_status: 'unmarked', complaints: [['味道有点冲，上脸前几秒有酒精感', 1]], e: '🧴', bg: 'linear-gradient(135deg,#fdf0e1,#f7d1a8)',
           body: '通勤党，早上水乳+防晒就出门。两周下来最大的感受是不闷，上妆也不搓泥。唯一的小缺点是 T 区到下午还是会有点油光。' },
-    a3: { t: '敏感期用了两周的碎碎念', a: '阿梨', likes: '412', days: 30, coop: false, complaints: [], e: '🌿', bg: 'linear-gradient(135deg,#e2f1f7,#b4d9ea)',
+    a3: { t: '敏感期用了两周的碎碎念', a: '阿梨', likes: '412', days: 30, collab_status: 'unmarked', complaints: [], e: '🌿', bg: 'linear-gradient(135deg,#e2f1f7,#b4d9ea)',
           body: '换季泛红期间试的，原本担心刺激，结果一点都没有。保湿力中等，干皮可能要再叠面霜。' },
-    b1: { t: '油皮通勤防晒天花板？真的不搓泥', a: '美妆研究所', likes: '5.1k', days: 38, coop: true, complaints: [['用到第二周开始搓泥了', 1], ['下午T区还是会反光', 1], ['叠粉底有点假白', 0]], e: '☀️', bg: 'linear-gradient(135deg,#fff4d1,#ffd982)',
+    b1: { t: '油皮通勤防晒天花板？真的不搓泥', a: '美妆研究所', likes: '5.1k', days: 38, collab_status: 'marked', complaints: [['用到第二周开始搓泥了', 1], ['下午T区还是会反光', 1], ['叠粉底有点假白', 0]], e: '☀️', bg: 'linear-gradient(135deg,#fff4d1,#ffd982)',
           body: '本篇为品牌合作。这支防晒成膜很快，号称 30 秒成膜，实测确实不黏手，适合赶时间的通勤族。' },
-    b2: { t: '夏日防晒测评｜成膜速度实测', a: 'Lily护肤日记', likes: '1.2k', days: 45, coop: true, complaints: [['测评只用了一天，参考价值有限', 0], ['和我自己用的感受差很多', 1]], e: '🧪', bg: 'linear-gradient(135deg,#ffeedd,#ffc79c)',
+    b2: { t: '夏日防晒测评｜成膜速度实测', a: 'Lily护肤日记', likes: '1.2k', days: 45, collab_status: 'marked', complaints: [['测评只用了一天，参考价值有限', 0], ['和我自己用的感受差很多', 1]], e: '🧪', bg: 'linear-gradient(135deg,#ffeedd,#ffc79c)',
           body: '本篇为品牌合作。横向对比了 5 款防晒的成膜速度，安澜这支排第二。' },
     b3: { deleted: true },
-    c1: { t: '控油真的绝！大油田救星', a: '油皮小王', likes: '1.8k', days: 9, coop: false, complaints: [['我用了会刺痛', 1], ['浓度是不是太高了', 0]], e: '👍', bg: 'linear-gradient(135deg,#e3f6ea,#b6e4c6)',
+    c1: { t: '控油真的绝！大油田救星', a: '油皮小王', likes: '1.8k', days: 9, collab_status: 'unmarked', complaints: [['我用了会刺痛', 1], ['浓度是不是太高了', 0]], e: '👍', bg: 'linear-gradient(135deg,#e3f6ea,#b6e4c6)',
           body: '大油田一枚，用了一周，中午不用补妆了！毛孔看起来也细了。不过身边有朋友用了泛红，大家量力而行。' },
-    c2: { t: '踩雷了…用三天脸颊泛红刺痛', a: '芋圆圆', likes: '1.5k', days: 12, coop: false, complaints: [['我也是，停了才好', 1], ['烟酰胺不耐受的千万别冲', 1], ['一模一样的症状', 0], ['早知道先局部试了', 1], ['客服说要建立耐受', 0]], e: '👎', bg: 'linear-gradient(135deg,#ffe6dc,#ffbea3)',
+    c2: { t: '踩雷了…用三天脸颊泛红刺痛', a: '芋圆圆', likes: '1.5k', days: 12, collab_status: 'unmarked', complaints: [['我也是，停了才好', 1], ['烟酰胺不耐受的千万别冲', 1], ['一模一样的症状', 0], ['早知道先局部试了', 1], ['客服说要建立耐受', 0]], e: '👎', bg: 'linear-gradient(135deg,#ffe6dc,#ffbea3)',
           body: '冲着控油买的，第三天两颊开始发红发烫，停用一周才恢复。建议敏感肌先在耳后试几天。' },
-    c3: { t: '建立耐受后再用，我的使用方法', a: '成分党阿杰', likes: '967', days: 20, coop: false, complaints: [], e: '📋', bg: 'linear-gradient(135deg,#eef0ff,#c7cdfb)',
+    c3: { t: '建立耐受后再用，我的使用方法', a: '成分党阿杰', likes: '967', days: 20, collab_status: 'unmarked', complaints: [], e: '📋', bg: 'linear-gradient(135deg,#eef0ff,#c7cdfb)',
           body: '烟酰胺浓度不低，第一周隔天用、只涂 T 区，第二周再全脸。按这个节奏我没有出现不适。' },
-    d1: { t: '新品试用｜积雪草乳液初体验', a: '小葵', likes: '128', days: 5, coop: null, complaints: null, e: '🌱', bg: 'linear-gradient(135deg,#e5f6ee,#bfe8d3)',
+    d1: { t: '新品试用｜积雪草乳液初体验', a: '小葵', likes: '128', days: 5, collab_status: 'unmarked', complaints: null, e: '🌱', bg: 'linear-gradient(135deg,#e5f6ee,#bfe8d3)',
           body: '刚上市的新品，用了 3 天，质地挺温和的，效果还要再观察。' },
-    d2: { t: '敏感肌新品开箱，先用三天看看', a: '新品试用官', likes: '56', days: 3, coop: true, complaints: [], e: '📦', bg: 'linear-gradient(135deg,#f1ecff,#d6caf7)',
+    d2: { t: '敏感肌新品开箱，先用三天看看', a: '新品试用官', likes: '56', days: 3, collab_status: 'marked', complaints: [], e: '📦', bg: 'linear-gradient(135deg,#f1ecff,#d6caf7)',
           body: '品牌寄送的试用装，先记录开箱和第一印象。' }
   };
 
@@ -538,62 +581,82 @@
       desc: '清爽不黏腻，多位用户反馈连用 2 周闭口减少', score: 8.7, pct: 87, verified: 12,
       fresh: [['ok', '价格', '笔记里 ¥89 → 现在 ¥89，没有变'], ['ok', '配方', '成分备案 2025-08 至今没有变更'], ['ok', '在售状态', '官方旗舰店在售，有货']],
       skins: ['油皮', '混合皮', '敏感皮'], scenes: ['日常通勤', '熬夜加班'],
-      meta: { days: 21, coop: false, complaints: [['味道有点冲，上脸前几秒有酒精感', 1]] }, notes: ['a1', 'a2', 'a3'] },
+      meta: { days: 21, collab_status: 'unmarked', complaints: [['味道有点冲，上脸前几秒有酒精感', 1]] }, notes: ['a1', 'a2', 'a3'] },
     { id: 'B', cat: '防晒', name: '安澜 清透控油防晒乳', price: 139, emoji: '☀️', thumbBg: 'linear-gradient(135deg,#fff2c9,#ffd77a)',
       desc: '成膜快、不搓泥，主打油皮夏季日常通勤', score: 6.1, pct: 41,
       fresh: [['warn', '价格', '笔记里 ¥129 → 现在 ¥139，涨了 ¥10'], ['warn', '配方', '2026-10 配方升级（换了成膜剂），旧笔记写的可能是老配方'], ['ok', '在售状态', '官方旗舰店在售，有货']],
       skins: ['油皮', '混合皮'], scenes: ['日常通勤', '运动健身', '旅行出差'],
-      meta: { days: 38, coop: true, complaints: [['用到第二周开始搓泥了', 1], ['下午T区还是会反光', 1], ['叠粉底有点假白', 0]] }, notes: ['b1', 'b2', 'b3'] },
+      meta: { days: 38, collab_status: 'marked', complaints: [['用到第二周开始搓泥了', 1], ['下午T区还是会反光', 1], ['叠粉底有点假白', 0]] }, notes: ['b1', 'b2', 'b3'] },
     { id: 'C', cat: '精华', name: '初研 烟酰胺控油精华', price: 159, emoji: '💧', thumbBg: 'linear-gradient(135deg,#dcecff,#a9cdfa)',
       desc: '控油效果明显，但耐受差异大', score: 5.4, pct: 23,
       fresh: [['ok', '价格', '笔记里 ¥159 → 现在 ¥159，没有变'], ['ok', '配方', '成分备案 2026-01 至今没有变更'], ['ok', '在售状态', '官方旗舰店在售，近期有满减']],
       skins: ['油皮'], scenes: ['日常通勤'],
-      meta: { days: 9, coop: false, complaints: [['用三天脸颊泛红刺痛', 1], ['停用一周才恢复', 1], ['烟酰胺不耐受的千万别冲', 1], ['浓度太高了', 0], ['用了会刺痛', 1], ['敏感肌慎入', 0], ['早知道先局部试了', 1]] }, notes: ['c1', 'c2', 'c3'] },
+      meta: { days: 9, collab_status: 'unmarked', complaints: [['用三天脸颊泛红刺痛', 1], ['停用一周才恢复', 1], ['烟酰胺不耐受的千万别冲', 1], ['浓度太高了', 0], ['用了会刺痛', 1], ['敏感肌慎入', 0], ['早知道先局部试了', 1]] }, notes: ['c1', 'c2', 'c3'] },
     { id: 'D', cat: '乳液', name: '禾初 积雪草舒缓乳', price: 75, emoji: '🌱', thumbBg: 'linear-gradient(135deg,#e5f6ee,#bfe8d3)',
       desc: '新上市，主打敏感肌舒缓，相关笔记还很少', score: null,
       fresh: [['ok', '价格', '首发价 ¥75，没有变'], ['muted', '配方', '新品，暂无历史配方可以对比'], ['ok', '在售状态', '官方旗舰店在售，有货']],
       skins: ['敏感皮', '干皮'], scenes: ['日常通勤'],
-      meta: { days: null, coop: null, complaints: null }, notes: ['d1', 'd2'] }
+      meta: { days: null, collab_status: 'unmarked', complaints: null }, notes: ['d1', 'd2'] }
   ];
 
   const verify = {
     // [状态, 大白话结论, 可验证的数据锚点]
     A: { list: [
       ['ok', '12 个网友都晒过购买记录', '12 张订单截图已和平台交易记录逐一比对，全部对得上'],
-      ['ok', '评论区互动自然，不像批量刷的', '近 30 天该账号互动分布与同类用户 P80 区间匹配'],
-      ['ok', '不是复制粘贴的套路文案', '与站内同品类笔记文本相似度低于 15%'],
+      ['ok', '评论区互动自然，没有发现批量刷评', '近 30 天该账号互动分布与同类用户 P80 区间匹配'],
+      ['ok', '文案原创度较高，与其他笔记重复少', '与站内同品类笔记文本相似度低于 15%'],
       ['ok', '12 个不同网友都说过类似体验', '12 位用户分属不同社交圈，无互关关系']] },
     B: { list: [
-      ['warn', '只有 2 个网友晒过购买记录', '9 篇相关笔记里只有 2 篇附了能核验的订单'],
-      ['ok', '评论区互动自然，不像批量刷的', '近 30 天该账号互动分布与同类用户 P75 区间匹配'],
-      ['warn', '7 篇合作笔记说法很像，有套路文案的痕迹', '7 篇合作笔记之间文本相似度 62%，站内同品类平均 12%'],
-      ['bad', '只有 2 个不同网友说过类似体验，还不够多', '独立用户 2 位，低于可信门槛 5 位']] },
+      ['warn', '2 位网友晒过能核验的购买记录', '9 篇相关笔记里有 2 篇附了能核验的订单'],
+      ['ok', '评论区互动自然，没有发现批量刷评', '近 30 天该账号互动分布与同类用户 P75 区间匹配'],
+      ['warn', '部分笔记的表述比较接近', '7 篇笔记之间文本相似度 62%，站内同品类平均 12%'],
+      ['warn', '目前分享体验的用户还比较集中', '独立用户 2 位，样本量少于 5 位时仅供参考']] },
     C: { list: [
       ['ok', '15 个网友都晒过购买记录', '15 张订单截图已和平台交易记录逐一比对，全部对得上'],
-      ['ok', '评论区互动自然，不像批量刷的', '近 30 天该账号互动分布与同类用户 P80 区间匹配'],
-      ['ok', '不是复制粘贴的套路文案', '与站内同品类笔记文本相似度低于 12%'],
+      ['ok', '评论区互动自然，没有发现批量刷评', '近 30 天该账号互动分布与同类用户 P80 区间匹配'],
+      ['ok', '文案原创度较高，与其他笔记重复少', '与站内同品类笔记文本相似度低于 12%'],
       ['bad', '说好用和说踩雷的人差不多各一半', '29 篇笔记：说好用 15 篇 / 说踩雷 12 篇 / 说不清 2 篇']], split: [52, 7, 41] },
     D: { insufficient: true, list: [['muted', '只有 2 篇笔记提到它，还看不出靠不靠谱', '站内相关笔记 2 篇，低于最低样本量 5 篇']] }
   };
 
-  // 验证用户（匿名化，只展示部分）
+  // 验证用户（匿名化，只展示部分）；cl = 历史内容覆盖的品类
   const verifiedUsers = {
     A: { summary: ['12/12 已验证购买', '彼此无互关', '粉丝 58 ~ 2.3 万不等'], list: [
-      { n: '橘**', skin: '混油敏感肌', fans: '2.3 万', cats: 5, days: 21, say: '连用 21 天闭口变少了', note: 'a1' },
-      { n: 'Mo**', skin: '混油皮', fans: '3,412', cats: 7, days: 14, say: '夏天也不闷，T 区下午会有点油', note: 'a2' },
-      { n: '阿*', skin: '敏感肌', fans: '860', cats: 4, days: 14, say: '泛红期用也没刺激，保湿中等', note: 'a3' },
-      { n: '小**', skin: '油皮', fans: '126', cats: 3, days: 30, say: '空了一瓶，已回购' },
-      { n: 'Ch**', skin: '油痘肌', fans: '1.1 万', cats: 6, days: 45, say: '控油一般，但确实不闷痘' },
-      { n: '一**', skin: '混合皮', fans: '58', cats: 2, days: 10, say: '质地清爽，学生党友好' }] }
+      { n: '橘**', skin: '混油敏感肌', fans: '2.3 万', cl: ['护肤', '彩妆', '穿搭', '美食', '旅行'], days: 21, say: '连用 21 天闭口变少了', note: 'a1' },
+      { n: 'Mo**', skin: '混油皮', fans: '3,412', cl: ['护肤', '彩妆', '健身', '家居', '数码', '美食', '摄影'], days: 14, say: '夏天也不闷，T 区下午会有点油', note: 'a2' },
+      { n: '阿*', skin: '敏感肌', fans: '860', cl: ['护肤', '读书', '咖啡', '穿搭'], days: 14, say: '泛红期用也没刺激，保湿中等', note: 'a3' },
+      { n: '小**', skin: '油皮', fans: '126', cl: ['护肤', '学习', '美食'], days: 30, say: '空了一瓶，已回购' },
+      { n: 'Ch**', skin: '油痘肌', fans: '1.1 万', cl: ['护肤', '彩妆', '健身', '穿搭', '旅行', '宠物'], days: 45, say: '控油一般，但确实不闷痘' },
+      { n: '一**', skin: '混合皮', fans: '58', cl: ['护肤', '学习'], days: 10, say: '质地清爽，学生党友好' }] },
+    B: { summary: ['2/2 已验证购买', '样本较少'], list: [
+      { n: '夏**', skin: '油皮', fans: '742', cl: ['护肤', '运动', '旅行'], days: 30, say: '成膜确实快，第二周开始有点搓泥' },
+      { n: 'Ke**', skin: '混油皮', fans: '2,086', cl: ['护肤', '彩妆', '穿搭', '美食'], days: 21, say: '通勤够用，下午 T 区会反光' }] },
+    C: { summary: ['15/15 已验证购买', '彼此无互关', '体验分歧较大'], list: [
+      { n: '油**', skin: '大油皮', fans: '1.8 万', cl: ['护肤', '男士', '健身'], days: 9, say: '控油明显，中午不用补妆', note: 'c1' },
+      { n: '芋**', skin: '敏感肌', fans: '6,530', cl: ['护肤', '彩妆', '美食', '家居', '母婴'], days: 3, say: '用三天两颊泛红，停用才恢复', note: 'c2' },
+      { n: '成**', skin: '混油皮', fans: '4,207', cl: ['护肤', '成分', '读书', '数码'], days: 20, say: '先隔天用建立耐受，就没有不适', note: 'c3' },
+      { n: '木**', skin: '油痘肌', fans: '93', cl: ['护肤', '学习'], days: 14, say: '控油可以，局部有点刺' }] }
   };
+
+  // 模拟 GET /api/ai/recommendation/verify 的返回（D 样本不足，返回 null）
+  const verifyApi = {
+    A: { verified_purchasers_count: 12, interaction_authenticity_score: 92, text_similarity_score: 13, user_diversity_score: 88 },
+    B: { verified_purchasers_count: 2, interaction_authenticity_score: 76, text_similarity_score: 62, user_diversity_score: 34 },
+    C: { verified_purchasers_count: 15, interaction_authenticity_score: 85, text_similarity_score: 11, user_diversity_score: 81 },
+    D: null
+  };
+
+  // AI 回答接口：已标注 / 未标注合作内容在核心体验上分歧较大时，后端返回 true
+  const aiAnswer = { topic: '油敏肌水乳推荐', show_cross_verify_tip: true };
 
   const praise = ['同款油皮，确实清爽', '收藏了，准备入', '请问敏感肌能用吗？', '已下单，坐等到货'];
   const avatarColors = ['#ff7a8a', '#6aa8ff', '#ffb347', '#7bc67e', '#b48cf2', '#4fc3c8'];
 
   /* ================= 状态 ================= */
   const state = {
-    prefs: loadPrefs(), loggedIn: false, filterOn: false,
-    feedback: {}, fbError: {}, fbTarget: null, downStreak: 0, popup: null
+    prefs: loadPrefs(), loggedIn: false,
+    feedback: {}, fbError: {}, fbTarget: null, downStreak: 0, popup: null,
+    tagClicks: 0, panelExpands: 0, panelOpen: {}, verifyCache: {}, tipExposed: 0
   };
 
   function loadPrefs() {
@@ -628,13 +691,12 @@
   }
 
   /* ================= 文案规则 ================= */
-  // 按后台可信度分区间匹配标签文案
-  function trustOf(r) {
-    if (r.score == null) return { cls: 'none', text: '暂无足够验证数据' };
-    if (r.score >= 8) return { cls: 'high', text: `${r.verified} 位真实用户验证过` };
-    if (r.score >= 6) return { cls: 'mid', text: '品牌合作内容，建议对比参考' };
-    return { cls: 'low', text: '争议较大，建议先局部试用' };
-  }
+  // 来源标签：只有两种状态，只告知来源，不做判断
+  const COLLAB_TEXT = { marked: '已标注合作', unmarked: '未标注合作' };
+  const collabTag = s => COLLAB_TEXT[s] ? `<span class="src-tag">${COLLAB_TEXT[s]}</span>` : '';
+  // 推荐级别：引用笔记中有任意一篇已标注合作，即为「已标注合作」
+  const recCollab = r => r.notes.some(id => notes[id].collab_status === 'marked') ? 'marked' : 'unmarked';
+  const purchasers = rid => verifyApi[rid] ? verifyApi[rid].verified_purchasers_count : 0;
 
   function timeLabel(days, short) {
     if (days == null) return { text: '—', stale: false };
@@ -651,21 +713,20 @@
     const ok = list.filter(c => c[1]).length;
     return `<div class="complaints"><div class="cp-h">吐槽原文（来自评论区，不隐藏、不过滤）· ${ok}/${list.length} 条来自已验证购买者</div>
       ${list.map(c => `<div class="cp"><div class="cp-t">“${c[0]}”</div>
-        <div class="cp-v ${c[1] ? 'ok' : 'no'}">${c[1] ? '✓ 已验证该用户为真实购买者' : '未查到购买记录，仅供参考'}</div></div>`).join('')}</div>`;
+        <div class="cp-v ${c[1] ? 'ok' : 'no'}">${c[1] ? '✓ 已验证购买' : '未查到购买记录，仅供参考'}</div></div>`).join('')}</div>`;
   }
 
-  function metaTagsHTML(m, short, rid) {
+  function metaTagsHTML(m, short, rid, withSrc) {
     const t = timeLabel(m.days, short);
     const time = m.days == null ? '<span class="mt">🕒 —</span>'
       : `<button class="mt time ${t.stale ? 'stale' : ''}" onclick="openFresh(event, '${rid}')">🕒 ${t.text} ›</button>`;
-    const coop = m.coop == null ? '<span class="mt">—</span>'
-      : m.coop ? '<span class="mt coop">🏷️ 品牌合作</span>' : '<span class="mt">无合作标识</span>';
+    const src = withSrc ? collabTag(m.collab_status) : '';
     let comp;
     if (m.complaints == null) comp = '<span class="mt">—</span>';
     else if (!m.complaints.length) comp = '<span class="mt good">无负面反馈</span>';
     else comp = `<button class="mt bad" onclick="toggleComplaints(event, this, '${rid}')"><i class="dot"></i><u>有 ${m.complaints.length} 条吐槽</u> <em>▾</em></button>`;
     const box = m.complaints && m.complaints.length ? complaintsBoxHTML(m.complaints) : '';
-    return `<div class="meta-wrap"><div class="meta-tags">${time}${coop}${comp}</div>${box}</div>`;
+    return `<div class="meta-wrap"><div class="meta-tags">${src}${time}${comp}</div>${box}</div>`;
   }
 
   function toggleComplaints(e, btn, rid) {
@@ -677,27 +738,28 @@
   }
 
   /* ================= 页面1：列表 ================= */
-  function visibleRecs() {
-    let list = recs.slice(), hiddenByPref = 0;
-    if (state.prefs && !state.prefs.acceptCoop) {
-      const n = list.length; list = list.filter(r => !r.meta.coop); hiddenByPref = n - list.length;
-    }
-    if (state.filterOn) list = list.filter(r => !r.meta.coop);
-    return { list, hiddenByPref };
-  }
-
   function fbRowHTML(id) {
     const fb = state.feedback[id];
-    if (fb) return `<span class="fb-done">✓ 已反馈：${fb.v === 'up' ? '有用' : `没用（${fb.reason}）`} · 今天不再打扰</span>`;
+    if (fb) return `<span class="fb-done">✓ 已反馈：${fb.v === 'up' ? '有用' : fb.reason === '举报' ? '已举报' : `没用（${fb.reason}）`} · 今天不再打扰</span>`;
     return `<span class="fb-q">这条推荐对你有用吗？</span>
       <button class="fb-btn" onclick="fbUp('${id}')">👍 有用</button>
       <button class="fb-btn" onclick="fbDown('${id}')">👎 没用</button>
       ${state.fbError[id] ? '<span class="fb-err">⚠ 反馈失败，请重试</span>' : ''}`;
   }
 
-  function cardHTML(r, idx) {
-    const tr = trustOf(r);
-    return `<div class="rec ${r.meta.coop ? 'is-coop' : ''}" data-id="${r.id}">
+  function cardNotesHTML(r) {
+    return `<div class="rec-notes"><div class="rn-h">引用的笔记 · ${r.notes.length} 篇</div>
+      ${r.notes.map(id => {
+        const n = notes[id];
+        if (n.deleted) return `<div class="rn gone"><span class="t">🚫 该内容已不可见</span></div>`;
+        return `<div class="rn" onclick="onNoteRow(event, this, '${id}', 'ai_answer_card')"><span class="t">📝 ${n.t}</span>${collabTag(n.collab_status)}<span class="chev">›</span></div>`;
+      }).join('')}</div>`;
+  }
+
+  function cardHTML(r) {
+    const st = recCollab(r);
+    return `<div class="rec" data-id="${r.id}">
+      <button class="src-tag corner" onclick="onSrcTag(event, this, '${r.id}')" aria-label="来源：${COLLAB_TEXT[st]}，点击查看原文">${COLLAB_TEXT[st]}</button>
       <div class="rec-top">
         <div class="rec-thumb" style="background:${r.thumbBg}">${r.emoji}</div>
         <div class="rec-body">
@@ -705,25 +767,18 @@
           <div class="rec-desc"><span class="rec-cat">${r.cat}</span>${r.desc}</div>
         </div>
       </div>
-      <button class="trust ${tr.cls}" onclick="openCred('${r.id}', ${idx + 1})">${shieldIcon}<span>${tr.text}</span><em>看依据 ›</em></button>
       ${metaTagsHTML(r.meta, false, r.id)}
+      ${cardNotesHTML(r)}
+      ${verifyPanelHTML(r.id)}
       <div class="fb-row">${fbRowHTML(r.id)}</div>
     </div>`;
   }
 
-  let observer;
+  let observer, tipObserver;
   function renderList() {
-    const { list, hiddenByPref } = visibleRecs();
-    let html = '';
-    if (hiddenByPref) html += `<div class="filter-note">已按你的偏好隐藏 ${hiddenByPref} 条品牌合作内容</div>`;
-    if (!list.length) {
-      html += `<div class="empty"><div>🔍</div>暂无符合条件的推荐，建议关闭筛选器查看<br><button onclick="toggleFilter()">关闭筛选</button></div>`;
-    } else {
-      html += list.map((r, i) => cardHTML(r, i)).join('');
-    }
-    $('#recList').innerHTML = html;
-    $('#filterChip').classList.toggle('on', state.filterOn);
+    $('#recList').innerHTML = recs.map(cardHTML).join('');
     document.querySelectorAll('#recList .fb-row').forEach(el => observer.observe(el));
+    renderXvTip();
   }
 
   function renderPrefBar() {
@@ -733,24 +788,97 @@
       : `🎯<span>还不知道你的偏好，推荐基于热门内容</span><em>去设置 ›</em>`;
   }
 
-  /* ---- 筛选器 ---- */
-  function toggleFilter() {
-    state.filterOn = !state.filterOn;
-    renderList();
-    track('use_filter', { filter_type: 'only_real_user', on: state.filterOn, result_count: visibleRecs().list.length });
+  /* ---- 来源角标：点击跳转原文，保留 AI 回答上下文 ---- */
+  function flash(el) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+  function logTagClick(page, rid, nid, position) {
+    state.tagClicks++;
+    track('click_source_tag', { click_count: state.tagClicks, source_page: page, position, rec_id: rid, note_id: nid, collab_status: notes[nid].collab_status });
   }
-  let tipTimer;
-  function toggleTip(e) {
+  function onSrcTag(e, el, rid) {
     e.stopPropagation();
-    const tip = $('#tip');
-    tip.classList.toggle('show');
-    clearTimeout(tipTimer);
-    if (tip.classList.contains('show')) tipTimer = setTimeout(() => tip.classList.remove('show'), 3000);
+    flash(el);
+    const r = recById(rid), st = recCollab(r);
+    const nid = r.notes.find(id => !notes[id].deleted && notes[id].collab_status === st);
+    logTagClick('ai_answer', rid, nid, 'card_corner');
+    setTimeout(() => openNote(el, nid, 'source_tag'), 160);
   }
-  document.addEventListener('click', e => {
-    const tip = $('#tip');
-    if (tip.classList.contains('show') && !tip.contains(e.target)) tip.classList.remove('show');
-  });
+  function onNoteRow(e, el, nid, page) {
+    const tag = e.target.closest('.src-tag');
+    if (tag) { flash(tag); logTagClick(page, recOfNote(nid).id, nid, 'note_row'); }
+    openNote(el, nid, tag ? 'source_tag' : 'note_row');
+  }
+
+  /* ---- 可信度验证面板（折叠卡片） ---- */
+  const hasCache = rid => Object.prototype.hasOwnProperty.call(state.verifyCache, rid);
+  function verifyPanelHTML(rid) {
+    const open = !!state.panelOpen[rid];
+    return `<div class="vp ${open ? 'open' : ''}" data-rid="${rid}">
+      <button class="vp-h" onclick="toggleVerify('${rid}')" aria-expanded="${open}">${shieldIcon}<span>这条推荐为什么可信？</span><em>▾</em></button>
+      <div class="vp-wrap"><div class="vp-in"><div class="vp-body">${open ? vpInnerHTML(rid) : ''}</div></div></div>
+    </div>`;
+  }
+  function vpInnerHTML(rid) {
+    if (!hasCache(rid)) return '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+    const d = state.verifyCache[rid];
+    if (d === 'error') return `<div class="vp-err">⚠ 验证数据加载失败<button class="link" onclick="retryVerify('${rid}')">重试</button></div>`;
+    const v = verify[rid], fullBtn = `<button class="link sub" onclick="openCred('${rid}')">完整依据 ›</button>`;
+    if (!d) return `<div class="vp-empty">📭 样本较少，暂无法完整验证<small>📊 ${v.list[0][2]}</small></div><div class="vp-foot"><span></span>${fullBtn}</div>`;
+    const dims = [
+      ['🛒', '购买验证', '', `${d.verified_purchasers_count} 位`, null, `${d.verified_purchasers_count} 位已验证购买用户用过`, v.list[0][2]],
+      ['💬', '互动真实性', '', `${d.interaction_authenticity_score}/100`, d.interaction_authenticity_score, v.list[1][1], v.list[1][2]],
+      ['📝', '文本相似度', '越低越原创', `${d.text_similarity_score}%`, d.text_similarity_score, v.list[2][1], v.list[2][2]],
+      ['👥', '用户多样性', '', `${d.user_diversity_score}/100`, d.user_diversity_score, v.list[3][1], v.list[3][2]]
+    ];
+    const n = d.verified_purchasers_count;
+    const who = verifiedUsers[rid] && n ? `<button class="link" onclick="openUsers('${rid}')">这 ${n} 位是谁 ›</button>` : '<span></span>';
+    return dims.map(x => `<div class="vd"><div class="vd-ic">${x[0]}</div><div class="vd-main">
+        <div class="vd-top">${x[1]}${x[2] ? `<small>${x[2]}</small>` : ''}<span class="v">${x[3]}</span></div>
+        ${x[4] != null ? `<div class="vd-bar"><b style="width:${x[4]}%"></b></div>` : ''}
+        <div class="vd-txt">${x[5]}</div><div class="anchor">📊 ${x[6]}</div></div></div>`).join('')
+      + `<div class="vp-foot">${who}${fullBtn}</div>`;
+  }
+  function renderVpBody(rid) {
+    const body = document.querySelector(`.vp[data-rid="${rid}"] .vp-body`);
+    if (body && state.panelOpen[rid]) body.innerHTML = vpInnerHTML(rid);
+  }
+  // 模拟请求 GET /api/ai/recommendation/verify?rec_id=xx
+  function fetchVerify(rid) {
+    return new Promise((resolve, reject) => setTimeout(() => {
+      if (!navigator.onLine) return reject(new Error('offline'));
+      const d = verifyApi[rid];
+      resolve(d ? { ...d, verified_users: verifiedUsers[rid] ? verifiedUsers[rid].list : [] } : null);
+    }, 450));
+  }
+  function loadVerify(rid) {
+    delete state.verifyCache[rid];
+    const t0 = Date.now();
+    fetchVerify(rid)
+      .then(d => { state.verifyCache[rid] = d; track('api_verify', { rec_id: rid, status: 'ok', cost_ms: Date.now() - t0 }); })
+      .catch(() => { state.verifyCache[rid] = 'error'; track('api_verify', { rec_id: rid, status: 'failed', cost_ms: Date.now() - t0 }); })
+      .finally(() => renderVpBody(rid));
+  }
+  function toggleVerify(rid) {
+    const vp = document.querySelector(`.vp[data-rid="${rid}"]`);
+    const open = !state.panelOpen[rid];
+    state.panelOpen[rid] = open;
+    vp.querySelector('.vp-h').setAttribute('aria-expanded', open);
+    if (!open) { vp.classList.remove('open'); return; }
+    state.panelExpands++;
+    track('expand_verify_panel', { rec_id: rid, expand_count: state.panelExpands, source_page: 'ai_answer' });
+    if (!hasCache(rid) || state.verifyCache[rid] === 'error') loadVerify(rid);
+    renderVpBody(rid);
+    void vp.offsetHeight;
+    vp.classList.add('open');
+  }
+  function retryVerify(rid) { loadVerify(rid); renderVpBody(rid); }
+
+  /* ---- 交叉验证提示：由后端 show_cross_verify_tip 决定是否展示 ---- */
+  function renderXvTip() {
+    const box = $('#xvTip');
+    if (!aiAnswer.show_cross_verify_tip) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="xv-tip" role="note"><i>ⓘ</i><span>该话题下存在较多不同视角的分享，建议结合原文评论区综合判断</span></div>';
+    if (!state.tipExposed) tipObserver.observe(box.firstElementChild);
+  }
 
   /* ================= 页面2：可信度解释弹窗 ================= */
   function matchHTML(r) {
@@ -780,7 +908,7 @@
     let html = v.insufficient ? '<div class="insufficient">📭 这条推荐的验证数据还不够多，建议多对比几条</div>' : '';
     html += `<ul class="checks">${v.list.map((c, i) => `<li><span class="ck ${c[0]}">${c[0] === 'ok' ? '✓' : '!'}</span>
       <div class="ck-main"><div>${c[1]}</div>${c[2] ? `<div class="anchor">📊 ${c[2]}</div>` : ''}
-      ${i === 0 && verifiedUsers[rid] ? `<button class="link anchor-link" onclick="openUsers('${rid}')">看看是哪 ${r.verified} 位 ›</button>` : ''}</div></li>`).join('')}</ul>`;
+      ${i === 0 && verifiedUsers[rid] ? `<button class="link anchor-link" onclick="openUsers('${rid}')">这 ${purchasers(rid)} 位是谁 ›</button>` : ''}</div></li>`).join('')}</ul>`;
     if (v.split) html += `
       <div class="split">
         <i style="width:${v.split[0]}%;background:var(--green)"></i><i style="width:${v.split[1]}%;background:#c4c4c8"></i><i style="width:${v.split[2]}%;background:var(--low)"></i>
@@ -789,30 +917,33 @@
     return html;
   }
 
-  function noteRowHTML(id) {
+  function noteRowHTML(id, page) {
     const n = notes[id];
     if (n.deleted) return `<div class="src-row gone"><div class="src-cover">🚫</div>
         <div class="src-main"><div class="src-title">该内容已不可见</div><div class="src-sub">笔记已被作者删除或下架</div></div></div>`;
-    return `<div class="src-row" onclick="openNote(this, '${id}')">
+    return `<div class="src-row" onclick="onNoteRow(event, this, '${id}', '${page || 'cred_popup'}')">
       <div class="src-cover" style="background:${n.bg}">${n.e}</div>
       <div class="src-main">
         <div class="src-title">${n.t}</div>
-        ${metaTagsHTML(n, true, recOfNote(id).id)}
+        ${metaTagsHTML(n, true, recOfNote(id).id, true)}
         <div class="src-author">${avatar(n.a)}<span>${n.a}</span><span class="likes">♡ ${n.likes} 赞</span></div>
       </div>
       <span class="chev">›</span>
     </div>`;
   }
 
-  function trustBadgeHTML(r, tr) {
-    if (verifiedUsers[r.id]) return `<button class="trust-inline ${tr.cls} clickable" onclick="openUsers('${r.id}')">${tr.text} <b>›</b></button>`;
-    return `<span class="trust-inline ${tr.cls}">${tr.text}</span>`;
+  function trustBadgeHTML(r) {
+    const n = purchasers(r.id);
+    const cnt = !n ? '<span class="trust-inline none">验证样本较少</span>'
+      : verifiedUsers[r.id] ? `<button class="trust-inline none clickable" onclick="openUsers('${r.id}')">${n} 位已验证购买 <b>›</b></button>`
+      : `<span class="trust-inline none">${n} 位已验证购买</span>`;
+    return collabTag(recCollab(r)) + cnt;
   }
 
   function credFbHTML(rid, picking) {
     const fb = state.feedback[rid];
     const close = `<button class="btn-primary" onclick="closeCred(this)">关闭</button>`;
-    if (fb) return `<div class="foot-btns"><div class="cf-done">✓ 已反馈：${fb.v === 'up' ? '有帮助' : `没帮助（${fb.reason}）`}</div>${close}</div>`;
+    if (fb) return `<div class="foot-btns"><div class="cf-done">✓ 已反馈：${fb.v === 'up' ? '有帮助' : fb.reason === '举报' ? '已举报' : `没帮助（${fb.reason}）`}</div>${close}</div>`;
     const reasons = picking ? `<div class="cf-reasons"><span>哪里没帮助？</span>${['信息过时了', '不适合我', '感觉是广告'].map(x => `<button class="pchip" onclick="credPick('${rid}', '${x}')">${x}</button>`).join('')}</div>` : '';
     const err = state.fbError[rid] ? '<div class="cf-err">⚠ 反馈失败，请重试</div>' : '';
     return `${reasons}${err}<div class="foot-btns">
@@ -821,17 +952,17 @@
   }
 
   function sheetHTML(rid) {
-    const r = recById(rid), tr = trustOf(r);
+    const r = recById(rid);
     return `
       <div class="sheet-head">
         <div class="sheet-grip"></div>
-        <div class="sheet-title">这条推荐为什么可信？</div>
-        <div class="sheet-sub">${r.name}${trustBadgeHTML(r, tr)}</div>
+        <div class="sheet-title">完整推荐依据</div>
+        <div class="sheet-sub">${r.name}${trustBadgeHTML(r)}</div>
         <button class="sheet-close" onclick="closeCred(this)">✕</button>
       </div>
       <div class="sheet-body">
         ${matchHTML(r)}
-        <div class="sec-title">大家怎么说 <span>每条都附可核验的数据</span></div>
+        <div class="sec-title">每一项依据 <span>每条都附可核验的数据</span></div>
         ${verifyHTML(rid)}
         <div class="sec-title">引用的笔记 <button class="link" onclick="viewAll(this, '${rid}')">共 ${r.notes.length} 篇 · 查看全部 ›</button></div>
         <div>${r.notes.map(noteRowHTML).join('')}</div>
@@ -844,36 +975,61 @@
 
   /* ---- 第二层：验证用户 ---- */
   function openUsers(rid) {
-    const r = recById(rid), u = verifiedUsers[rid], ph = phone1();
+    const r = recById(rid), u = verifiedUsers[rid], ph = phone1(), n = purchasers(rid);
     ph.querySelector('.sheet-users').innerHTML = `
       <div class="sheet-head">
         <div class="sheet-grip"></div>
-        <div class="sheet-title">这 ${r.verified} 位用户是谁？</div>
-        <div class="sheet-sub">已隐去昵称和头像，背景信息给你自己判断</div>
+        <div class="sheet-title">这 ${n} 位是谁？</div>
+        <div class="sheet-sub">${r.name} · 已隐去昵称和头像，背景信息给你自己判断</div>
         <button class="sheet-close" onclick="closeUsers()">✕</button>
       </div>
       <div class="sheet-body">
         <div class="u-sum">${u.summary.map(s => `<span>${s}</span>`).join('')}</div>
-        ${u.list.map(x => `<div class="u-card">
+        ${u.list.map((x, i) => `<div class="u-card go" onclick="openUserHome('${rid}', ${i})">
           <div class="u-av">匿</div>
           <div class="u-main">
             <div class="u-name">用户 ${x.n}<span>${x.skin} · 用了 ${x.days} 天</span></div>
-            <div class="u-tags"><span class="ut ok">✓ 已验证购买</span><span class="ut">粉丝 ${x.fans}</span><span class="ut">历史内容覆盖 ${x.cats} 个品类</span></div>
+            <div class="u-tags"><span class="ut ok">✓ 已验证购买</span><span class="ut">粉丝 ${x.fans}</span><span class="ut">历史内容覆盖 ${x.cl.length} 个品类</span></div>
             <div class="u-say">“${x.say}”</div>
           </div>
-          ${x.note ? `<button class="link u-go" onclick="openNote(this, '${x.note}')">看原帖 ›</button>` : ''}
+          <span class="chev">›</span>
         </div>`).join('')}
-        <div class="u-more">仅展示 ${u.list.length} 位 · 其余 ${r.verified - u.list.length} 位未公开主页</div>
+        <div class="u-more">${n > u.list.length ? `仅展示 ${u.list.length} 位 · 其余 ${n - u.list.length} 位未公开主页` : `共 ${n} 位，已全部展示`}</div>
       </div>
       <div class="sheet-foot"><button class="btn-primary" onclick="closeUsers()">返回</button></div>`;
     ph.classList.add('open-mask2');
     ph.querySelector('.sheet-users').classList.add('show');
-    track('open_verified_users', { rec_id: rid, shown: u.list.length });
+    track('click_who_users', { rec_id: rid, verified_count: n, shown: u.list.length });
   }
   function closeUsers() {
     const ph = phone1();
     ph.querySelector('.sheet-users').classList.remove('show');
     ph.classList.remove('open-mask2');
+  }
+
+  /* ---- 用户主页（匿名） ---- */
+  function openUserHome(rid, i) {
+    const x = verifiedUsers[rid].list[i], r = recById(rid), L = phone1().querySelector('.layer-user');
+    L.innerHTML = `${statusbar()}
+      <div class="navbar">
+        <span class="back" onclick="closeLayer(this)">‹</span>
+        <div class="title center">用户主页</div><span class="more"></span>
+      </div>
+      <div class="scroll">
+        <div class="uh-head">
+          <div class="u-av">匿</div>
+          <div class="nm">用户 ${x.n}</div>
+          <div class="sub">${x.skin} · 已隐去昵称和头像</div>
+          <div class="uh-stats"><div><b>${x.fans}</b>粉丝</div><div><b>${x.cl.length}</b>覆盖品类</div><div><b>✓</b>已验证购买</div></div>
+        </div>
+        <div class="uh-sec"><div class="pref-h">历史内容覆盖品类</div><div class="u-tags">${x.cl.map(c => `<span class="ut">${c}</span>`).join('')}</div></div>
+        <div class="uh-sec"><div class="pref-h">TA 对「${r.name}」的体验<span>用了 ${x.days} 天</span></div>
+          ${x.note ? noteRowHTML(x.note, 'user_home') : `<div class="u-say" style="margin-top:0">“${x.say}”</div><div class="anchor">TA 没有发布相关笔记，以上来自评论区</div>`}
+        </div>
+        <div class="algo-note">原型示意数据，正式版跳转站内用户主页</div>
+      </div>`;
+    L.classList.add('show');
+    track('jump_user_home', { rec_id: rid, user: x.n, from: 'who_users_sheet' });
   }
 
   /* ---- 时效性：产品信息是否仍有效 ---- */
@@ -900,12 +1056,11 @@
     track('click_freshness', { rec_id: rid, changed: warn });
   }
 
-  function openCred(rid, pos) {
+  function openCred(rid) {
     const ph = phone1();
     ph.querySelector('.sheet-cred').innerHTML = sheetHTML(rid);
     state.popup = { rid, t: Date.now() };
-    track('click_trust_tag', { rec_id: rid, label: trustOf(recById(rid)).text, position: pos });
-    track('popup_open', { rec_id: rid });
+    track('popup_open', { rec_id: rid, from: 'verify_panel' });
     showSheet(ph, '.sheet-cred');
   }
   function closeCred(el) {
@@ -932,25 +1087,25 @@
         <div class="nm">${avatar(n.a)}${n.a}</div>
         <button class="follow">关注</button>
       </div>
+      <div class="ctx-bar">✦ 来自点点回答「${aiAnswer.topic}」· 返回可继续查看</div>
       <div class="note-scroll">
-        <div class="note-big" style="background:${n.bg}">${n.e}${n.coop ? '<span class="coop-banner">🏷️ 品牌合作笔记</span>' : ''}</div>
+        <div class="note-big" style="background:${n.bg}">${n.e}</div>
         <div class="note-content">
           <div class="n-title">${n.t}</div>
           <div class="n-body">${n.body}</div>
-          <div class="n-meta">${metaTagsHTML(n, false, recOfNote(id).id)}</div>
+          <div class="n-meta">${metaTagsHTML(n, false, recOfNote(id).id, true)}</div>
         </div>
         <div class="n-cmt-h">共 ${cmts.length} 条评论${negN ? ` · 其中 ${negN} 条吐槽` : ''}</div>
         ${cmts.map(c => `<div class="n-cmt">${avatar(c.u)}<div><div class="u">${c.u}${c.neg ? `<span class="neg-tag">吐槽</span><span class="cp-v ${c.buyer ? 'ok' : 'no'}">${c.buyer ? '✓ 已验证购买' : '未查到购买记录'}</span>` : ''}</div><div class="c">${c.t}</div></div></div>`).join('')}
         <div style="height:40px"></div>
       </div>`;
   }
-  function openNote(el, id) {
-    const ph = el.closest('.phone');
+  function openNote(el, id, from) {
+    const ph = el.closest('.phone') || phone1();
     const L = ph.querySelector('.layer-note');
     L.innerHTML = noteHTML(id);
     L.classList.add('show');
-    const r = recs.find(x => x.notes.includes(id));
-    track('click_source_card', { rec_id: r.id, note_id: id, is_coop: notes[id].coop });
+    track('open_note', { rec_id: recOfNote(id).id, note_id: id, from: from || 'note_row', collab_status: notes[id].collab_status });
   }
   function closeLayer(el) { el.closest('.layer').classList.remove('show'); }
 
@@ -984,6 +1139,7 @@
       </div>
       <div class="fb-sheet-body">
         ${['信息过时了', '不适合我', '感觉是广告', '其他原因'].map(r => `<button class="reason" onclick="pickReason('${r}')">${r}<span>›</span></button>`).join('')}
+        <button class="reason" onclick="reportRec()">🚩 举报这条内容<span>›</span></button>
       </div>
       <div class="sheet-foot" style="border:none;padding-top:4px">
         <button class="pref-entry" onclick="openPrefs(this)">🎯<div>设置你的偏好<small>告诉点点你的肤质、预算、场景</small></div><b>›</b></button>
@@ -993,6 +1149,14 @@
   function pickReason(reason) {
     hideAll(phone1());
     recordDown(state.fbTarget, reason, 'card');
+  }
+  function reportRec() {
+    const id = state.fbTarget, ph = phone1();
+    hideAll(ph);
+    state.feedback[id] = { v: 'down', reason: '举报' };
+    track('report', { rec_id: id, from: 'card_feedback' });
+    rerenderFb(id);
+    toast(ph, '已收到举报，我们会尽快核实');
   }
   function recordDown(id, reason, from) {
     const ph = phone1();
@@ -1034,7 +1198,7 @@
 
   /* ================= 偏好设置 ================= */
   function prefsPageHTML(isLayer) {
-    const p = state.prefs || { skin: null, budget: null, scenes: [], acceptCoop: true };
+    const p = state.prefs || { skin: null, budget: null, scenes: [] };
     const chip = (g, v, label, on, multi) =>
       `<button class="pchip ${on ? 'on' : ''}" data-g="${g}" data-v="${v}" onclick="pickChip(this, ${multi ? 1 : 0})">${label}</button>`;
     return `${isLayer ? statusbar() : ''}
@@ -1047,7 +1211,6 @@
         <div class="pref-sec"><div class="pref-h">肤质</div><div class="pchips">${['油皮', '干皮', '混合皮', '敏感皮'].map(s => chip('skin', s, s, p.skin === s)).join('')}</div></div>
         <div class="pref-sec"><div class="pref-h">预算范围</div><div class="pchips">${[50, 100, 200, 0].map(b => chip('budget', b, budgetLabel(b), p.budget === b)).join('')}</div></div>
         <div class="pref-sec"><div class="pref-h">使用场景<span>可多选</span></div><div class="pchips">${SCENES.map(s => chip('scenes', s, s, p.scenes.includes(s), true)).join('')}</div></div>
-        <div class="pref-sec"><div class="pref-h">是否接受品牌合作内容</div><div class="pchips">${chip('coop', 1, '接受（会标注出来）', p.acceptCoop)}${chip('coop', 0, '不接受，帮我隐藏', !p.acceptCoop)}</div></div>
         <div class="pref-store">${state.loggedIn ? '☁️ 已登录：偏好会同步到云端，换设备也能用' : '📱 未登录：偏好只保存在本机，换设备后不保留'}</div>
       </div>
       <div class="pref-foot"><button class="btn-primary" onclick="savePrefs(this)">保存偏好</button></div>`;
@@ -1071,11 +1234,10 @@
     state.prefs = {
       skin: pick('skin').dataset.v,
       budget: Number(pick('budget').dataset.v),
-      scenes: [...root.querySelectorAll('.pchip.on[data-g="scenes"]')].map(c => c.dataset.v),
-      acceptCoop: pick('coop') ? pick('coop').dataset.v === '1' : true
+      scenes: [...root.querySelectorAll('.pchip.on[data-g="scenes"]')].map(c => c.dataset.v)
     };
     storePrefs();
-    track('save_preference', { skin: state.prefs.skin, budget: state.prefs.budget, scenes: state.prefs.scenes, accept_coop: state.prefs.acceptCoop, sync: state.loggedIn ? 'cloud' : 'local' });
+    track('save_preference', { skin: state.prefs.skin, budget: state.prefs.budget, scenes: state.prefs.scenes, sync: state.loggedIn ? 'cloud' : 'local' });
     const layer = el.closest('.layer');
     if (layer) layer.classList.remove('show');
     renderAll();
@@ -1146,11 +1308,20 @@
   /* ================= 初始化 ================= */
   // 注入二级页面容器与 toast
   phone1().insertAdjacentHTML('beforeend',
-    '<div class="layer layer-note"></div><div class="layer layer-prefs prefs-root"></div><div class="layer layer-fresh"></div><div class="toast"></div>');
+    '<div class="layer layer-note"></div><div class="layer layer-user"></div><div class="layer layer-prefs prefs-root"></div><div class="layer layer-fresh"></div><div class="toast"></div>');
 
   // 反馈入口：卡片滑入可视区后才出现
   observer = new IntersectionObserver(entries => {
     entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('seen'); observer.unobserve(en.target); } });
+  }, { root: $('#scroll1'), threshold: 0.6 });
+  // 交叉验证提示曝光
+  tipObserver = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting || state.tipExposed) return;
+      state.tipExposed++;
+      tipObserver.disconnect();
+      track('cross_verify_tip_expose', { topic: aiAnswer.topic, exposure_count: state.tipExposed });
+    });
   }, { root: $('#scroll1'), threshold: 0.6 });
 
   applyTheme();
