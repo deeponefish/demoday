@@ -1472,6 +1472,8 @@
         <div class="gal-item"><div class="gal-cap"><b>${VIEWS.flatMap(x => x[1]).indexOf(v) + 1}</b>${v[1]}</div><div class="gal-how">${v[2]}</div>
           <div class="gal-frame"><iframe src="${base}?view=${v[0]}" loading="lazy" title="${v[1]}"></iframe></div></div>`).join('')}</div></div>`).join('')}
     </div>`);
+    const s0 = parseFloat(new URLSearchParams(location.search).get('s'));
+    if (s0) { document.querySelector('.gal').style.setProperty('--s', s0); document.querySelectorAll('.gal-zoom button').forEach(b => b.classList.toggle('on', b.textContent === Math.round(s0 * 100) + '%')); }
   }
   function galZoom(btn, s) {
     document.querySelector('.gal').style.setProperty('--s', s);
