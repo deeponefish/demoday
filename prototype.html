@@ -3,207 +3,333 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小红书 AI 对话 · 来源可信度标识系统 原型</title>
+<title>点点推荐可信度优化 · 原型 v2</title>
 <style>
-  :root {
-    --red: #ff2442;
-    --red-soft: #fff0f2;
+  body {
+    --canvas: #e9eaee;
     --bg: #f5f6f8;
     --card: #ffffff;
     --line: #ececec;
+    --line-2: #f3f3f3;
     --text: #222222;
     --text-2: #666666;
     --text-3: #a3a3a3;
+    --chip: #f3f3f5;
+    --bubble: #e9e9ec;
+    --icon: #333333;
+    --red: #ff2442;
+    --red-soft: #fff0f2;
+    --red-line: #ffd6dc;
     --green: #1aa260;
     --green-bg: #e9f8f0;
-    --yellow: #b7860b;
-    --yellow-bg: #fff7dc;
-    --orange: #e8590c;
-    --orange-bg: #fff0e5;
+    --yellow: #a87a00;
+    --yellow-bg: #fff5d6;
+    --coop-bg: #fffbea;
+    --coop-line: #f3e3a6;
+    --low: #e03131;
+    --low-bg: #fff0f0;
+    --gray: #8a8a8a;
+    --gray-bg: #f2f3f5;
+    --stale: #c26a00;
+    --stale-bg: #fff3e0;
+    --tip-bg: #2b2b2b;
+  }
+  body.dark {
+    --canvas: #2a2a2d;
+    --bg: #0f0f10;
+    --card: #1c1c1e;
+    --line: #2e2e31;
+    --line-2: #262628;
+    --text: #f2f2f2;
+    --text-2: #b4b4b8;
+    --text-3: #6e6e73;
+    --chip: #2a2a2d;
+    --bubble: #2c2c2e;
+    --icon: #dddddd;
+    --red-soft: rgba(255, 36, 66, .14);
+    --red-line: rgba(255, 36, 66, .35);
+    --green: #34c77b;
+    --green-bg: rgba(52, 199, 123, .14);
+    --yellow: #e8b938;
+    --yellow-bg: rgba(232, 185, 56, .14);
+    --coop-bg: #25221a;
+    --coop-line: #4a4126;
+    --low: #ff6b6b;
+    --low-bg: rgba(255, 107, 107, .14);
+    --gray: #9a9a9f;
+    --gray-bg: #2a2a2d;
+    --stale: #ffa94d;
+    --stale-bg: rgba(255, 169, 77, .14);
+    --tip-bg: #3a3a3d;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  button { font-family: inherit; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", "Segoe UI", sans-serif;
-    background: #e9eaee;
+    background: var(--canvas);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
+    transition: background .2s;
   }
-  .canvas {
-    display: flex; gap: 48px; justify-content: center; align-items: flex-start;
-    flex-wrap: wrap; padding: 40px 24px 60px;
-  }
+  .canvas { display: flex; gap: 40px; justify-content: center; align-items: flex-start; flex-wrap: wrap; padding: 40px 24px 60px; }
   .frame-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
   .frame-label { font-size: 14px; color: #555; font-weight: 600; }
-  .frame-label span { color: var(--text-3); font-weight: 400; margin-left: 6px; }
+  body.dark .frame-label { color: #ccc; }
+  .frame-label span { color: #9a9a9a; font-weight: 400; margin-left: 6px; }
+
+  /* ---------- 演示控制台 ---------- */
+  .console {
+    width: 270px; background: #fff; color: #222; border-radius: 16px; padding: 16px; font-size: 13px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.08); position: sticky; top: 20px; margin-top: 34px;
+  }
+  .c-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+  .c-title span { font-size: 11px; color: #999; font-weight: 400; margin-left: 4px; }
+  .sw { display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; }
+  .sw input { accent-color: #ff2442; width: 15px; height: 15px; }
+  .c-btns { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
+  .c-btns button, .c-sub button { border: 1px solid #e3e3e3; background: #fafafa; border-radius: 8px; padding: 5px 9px; font-size: 12px; cursor: pointer; color: #333; }
+  .c-btns button:hover { border-color: #ff2442; color: #ff2442; }
+  .c-sub { display: flex; justify-content: space-between; align-items: center; font-weight: 600; border-top: 1px solid #eee; padding-top: 12px; }
+  .c-sub button { padding: 2px 8px; font-weight: 400; }
+  .logs { margin-top: 8px; max-height: 330px; overflow-y: auto; font-family: Consolas, Menlo, monospace; font-size: 11px; line-height: 1.5; }
+  .logs .lg { padding: 5px 0; border-bottom: 1px dashed #eee; word-break: break-all; }
+  .logs .lg b { color: #ff2442; font-weight: 600; }
+  .logs .lg i { color: #999; font-style: normal; margin-right: 4px; }
+  .logs .empty-log { color: #aaa; padding: 8px 0; }
+  .c-hint { font-size: 11px; color: #aaa; margin-top: 10px; line-height: 1.5; }
 
   /* ---------- 手机框 ---------- */
   .phone {
-    width: 375px; height: 812px; background: var(--bg);
+    width: 375px; height: 812px; background: var(--bg); color: var(--text);
     border-radius: 44px; position: relative; overflow: hidden;
     box-shadow: 0 0 0 10px #111, 0 20px 60px rgba(0,0,0,.25);
     display: flex; flex-direction: column;
   }
-  .statusbar {
-    height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
-    padding: 0 26px 0 32px; font-size: 15px; font-weight: 600;
-  }
+  .statusbar { height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 26px 0 32px; font-size: 15px; font-weight: 600; }
   .statusbar .icons { display: flex; gap: 6px; align-items: center; font-size: 12px; }
-  .battery { border: 1.5px solid #222; border-radius: 4px; padding: 0 3px; font-size: 10px; line-height: 13px; background: #222; color: #fff; }
-  .home-indicator { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; border-radius: 3px; background: #bdbdbd; z-index: 5; }
+  .battery { border-radius: 4px; padding: 0 4px; font-size: 10px; line-height: 14px; background: var(--text); color: var(--bg); }
+  .home-indicator { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; border-radius: 3px; background: #bdbdbd; z-index: 40; }
 
-  .navbar {
-    height: 48px; flex-shrink: 0; display: flex; align-items: center; padding: 0 16px; gap: 10px;
-  }
-  .navbar .back { font-size: 22px; width: 24px; color: #222; cursor: default; }
+  .navbar { height: 48px; flex-shrink: 0; display: flex; align-items: center; padding: 0 16px; gap: 10px; }
+  .navbar .back { font-size: 24px; width: 24px; color: var(--icon); cursor: pointer; line-height: 1; }
   .orb { width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #c9fff4, #6fe3d0 60%, #47cdb9); }
-  .navbar .title { font-size: 17px; font-weight: 600; flex: 1; }
-  .navbar .more { font-size: 20px; letter-spacing: 1px; color: #333; }
+  .navbar .title { font-size: 17px; font-weight: 600; flex: 1; user-select: none; }
+  .navbar .title.center { text-align: center; }
+  .navbar .more { font-size: 20px; letter-spacing: 1px; color: var(--icon); width: 24px; text-align: right; }
 
   .scroll { flex: 1; overflow-y: auto; padding: 0 14px 12px; scrollbar-width: none; }
   .scroll::-webkit-scrollbar { display: none; }
 
   /* ---------- 页面1 ---------- */
-  .searchbar {
-    display: flex; align-items: center; gap: 8px; height: 38px; background: #fff; border-radius: 19px;
-    padding: 0 14px; margin: 2px 0 14px; border: 1px solid var(--line);
-  }
-  .searchbar svg { flex-shrink: 0; }
+  .searchbar { display: flex; align-items: center; gap: 8px; height: 38px; background: var(--card); border-radius: 19px; padding: 0 14px; margin: 2px 0 14px; border: 1px solid var(--line); }
   .searchbar input { border: none; outline: none; flex: 1; font-size: 14px; background: transparent; color: var(--text); font-family: inherit; }
-  .searchbar input::placeholder { color: var(--text-3); }
+  .searchbar input::placeholder, .input-pill input::placeholder { color: var(--text-3); }
   .searchbar .go { font-size: 13px; color: var(--red); font-weight: 600; }
 
   .user-msg { display: flex; justify-content: flex-end; margin-bottom: 12px; }
-  .user-msg div { background: #e9e9ec; border-radius: 18px; padding: 10px 14px; font-size: 15px; max-width: 80%; }
+  .user-msg div { background: var(--bubble); border-radius: 18px; padding: 10px 14px; font-size: 15px; max-width: 80%; }
 
   .ai-card { background: var(--card); border-radius: 18px; padding: 16px 14px 12px; }
-  .ai-intro { font-size: 14.5px; line-height: 1.7; color: #333; margin-bottom: 12px; }
+  .ai-intro { font-size: 14.5px; line-height: 1.7; margin-bottom: 10px; }
   .ai-intro b { font-weight: 600; }
-  .legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; color: var(--text-3); margin-bottom: 12px; }
-  .legend i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: 1px; }
 
-  .rec {
-    border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 10px;
-    display: flex; flex-wrap: wrap; gap: 10px; position: relative; background: #fff;
-  }
-  .rec-foot { flex-basis: 100%; display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px dashed #f0f0f0; }
-  .rec-foot .from { font-size: 11px; color: var(--text-3); }
-  .rec-thumb {
-    width: 56px; height: 56px; border-radius: 10px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 26px;
-  }
+  .pref-bar { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); background: var(--chip); border-radius: 8px; padding: 7px 10px; margin-bottom: 10px; cursor: pointer; }
+  .pref-bar span { flex: 1; }
+  .pref-bar em { font-style: normal; color: var(--red); flex-shrink: 0; }
+
+  .filter-row { position: relative; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+  .filter-chip { display: flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--card); color: var(--text-2); border-radius: 14px; padding: 4px 11px 4px 9px; font-size: 12.5px; cursor: pointer; }
+  .filter-chip .box { width: 13px; height: 13px; border: 1.5px solid var(--text-3); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #fff; }
+  .filter-chip.on { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+  .filter-chip.on .box { background: var(--green); border-color: var(--green); }
+  .q-btn { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--text-3); background: none; color: var(--text-3); font-size: 11px; cursor: pointer; line-height: 16px; }
+  .tip { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: var(--tip-bg); color: #fff; font-size: 12px; line-height: 1.55; padding: 9px 11px; border-radius: 8px; z-index: 5; display: none; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+  .tip::before { content: ""; position: absolute; top: -5px; left: 150px; border: 5px solid transparent; border-top: none; border-bottom-color: var(--tip-bg); }
+  .tip.show { display: block; }
+  .filter-note { font-size: 11.5px; color: var(--text-3); margin: -4px 0 10px; }
+
+  .empty { text-align: center; padding: 26px 10px; color: var(--text-3); font-size: 13px; border: 1px dashed var(--line); border-radius: 14px; margin-bottom: 10px; }
+  .empty div { font-size: 28px; margin-bottom: 6px; }
+  .empty button { margin-top: 10px; border: 1px solid var(--red); color: var(--red); background: none; border-radius: 14px; padding: 4px 14px; font-size: 12.5px; cursor: pointer; }
+
+  .rec { border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 10px; background: var(--card); }
+  .rec.is-coop { background: var(--coop-bg); border-color: var(--coop-line); }
+  .rec-top { display: flex; gap: 10px; }
+  .rec-thumb { width: 54px; height: 54px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 25px; }
   .rec-body { flex: 1; min-width: 0; }
-  .rec-top { display: flex; align-items: flex-start; gap: 6px; }
-  .rec-cat { font-size: 10.5px; color: var(--text-2); background: #f3f3f5; border-radius: 4px; padding: 1px 6px; flex-shrink: 0; margin-top: 2px; }
-  .rec-name { font-size: 15px; font-weight: 600; line-height: 1.35; flex: 1; }
+  .rec-name { font-size: 15px; font-weight: 600; line-height: 1.35; display: flex; justify-content: space-between; gap: 6px; }
+  .rec-name em { font-style: normal; font-size: 13px; color: var(--red); flex-shrink: 0; }
   .rec-desc { font-size: 12.5px; color: var(--text-2); margin-top: 4px; line-height: 1.5; }
-  .src-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 11.5px; border-radius: 6px; padding: 3px 7px; font-weight: 500; line-height: 1.3; }
-  .src-A { color: var(--green); background: var(--green-bg); }
-  .src-B { color: var(--yellow); background: var(--yellow-bg); }
-  .src-C { color: var(--orange); background: var(--orange-bg); }
+  .rec-cat { font-size: 10.5px; color: var(--text-2); background: var(--chip); border-radius: 4px; padding: 1px 5px; margin-right: 4px; }
 
-  .cred-btn {
-    flex-shrink: 0; align-self: flex-start; display: flex; flex-direction: column; align-items: center; gap: 1px;
-    border: 1px solid #ffd0d7; background: var(--red-soft); color: var(--red); border-radius: 10px;
-    padding: 5px 7px; font-size: 10.5px; cursor: pointer; font-family: inherit; transition: transform .12s;
-  }
-  .cred-btn b { font-size: 14px; font-weight: 700; line-height: 1.1; }
-  .cred-btn:hover { background: #ffe3e7; }
-  .cred-btn:active { transform: scale(.94); }
-  .cred-btn.mid { color: var(--yellow); background: var(--yellow-bg); border-color: #f5e2a6; }
-  .cred-btn.low { color: var(--orange); background: var(--orange-bg); border-color: #ffd3b5; }
+  .trust { margin-top: 10px; width: 100%; display: flex; align-items: center; gap: 6px; border: none; border-radius: 10px; padding: 8px 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: left; transition: transform .12s, filter .12s; }
+  .trust:hover { filter: brightness(.97); }
+  .trust:active { transform: scale(.98); }
+  .trust span { flex: 1; }
+  .trust em { font-style: normal; font-size: 11.5px; font-weight: 400; opacity: .85; }
+  .trust.high { color: var(--green); background: var(--green-bg); }
+  .trust.mid { color: var(--yellow); background: var(--yellow-bg); }
+  .trust.low { color: var(--low); background: var(--low-bg); }
+  .trust.none { color: var(--gray); background: var(--gray-bg); }
+
+  .meta-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .mt { font-size: 11px; color: var(--text-2); background: var(--chip); border-radius: 5px; padding: 2px 6px; border: none; line-height: 1.5; }
+  .mt.stale { color: var(--stale); background: var(--stale-bg); }
+  .mt.coop { color: var(--yellow); background: var(--yellow-bg); }
+  .mt.good { color: var(--green); background: var(--green-bg); }
+  .mt.bad { color: var(--low); background: var(--low-bg); cursor: pointer; }
+  .mt.bad em { font-style: normal; display: inline-block; transition: transform .2s; }
+  .mt.bad.open em { transform: rotate(180deg); }
+  .mt .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--low); margin-right: 3px; vertical-align: 1px; }
+  .complaints { display: none; margin-top: 6px; background: var(--low-bg); border-radius: 8px; padding: 8px 10px; }
+  .complaints.show { display: block; }
+  .cp-h { font-size: 11px; color: var(--low); margin-bottom: 3px; font-weight: 600; }
+  .cp { font-size: 12px; color: var(--text-2); line-height: 1.65; }
+
+  .fb-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; padding-top: 9px; border-top: 1px dashed var(--line); opacity: 0; transform: translateY(4px); transition: opacity .45s, transform .45s; }
+  .fb-row.seen { opacity: 1; transform: none; }
+  .fb-q { font-size: 12px; color: var(--text-3); flex: 1; }
+  .fb-btn { font-size: 12px; border: 1px solid var(--line); background: var(--card); color: var(--text-2); border-radius: 13px; padding: 3px 10px; cursor: pointer; }
+  .fb-btn:hover { border-color: var(--red); color: var(--red); }
+  .fb-err { flex-basis: 100%; order: 3; font-size: 11.5px; color: var(--low); }
+  .fb-done { font-size: 12px; color: var(--text-3); }
 
   .ai-actions { display: flex; gap: 8px; margin-top: 6px; }
-  .ai-actions .ic { width: 34px; height: 34px; border-radius: 10px; background: #f5f5f7; display: flex; align-items: center; justify-content: center; }
+  .ai-actions .ic { width: 34px; height: 34px; border-radius: 10px; background: var(--chip); display: flex; align-items: center; justify-content: center; color: var(--icon); }
   .ai-actions .sp { flex: 1; }
+  .suggest { display: inline-block; background: var(--bubble); border-radius: 18px; padding: 10px 14px; font-size: 14px; margin-top: 10px; }
 
-  .suggest { display: inline-block; background: #e9e9ec; border-radius: 18px; padding: 10px 14px; font-size: 14px; color: #333; margin-top: 10px; }
+  .bottom-input { flex-shrink: 0; padding: 8px 14px 30px; background: var(--bg); color: var(--icon); }
+  .input-pill { height: 50px; background: var(--card); border-radius: 25px; display: flex; align-items: center; padding: 0 14px; gap: 10px; box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+  .input-pill input { flex: 1; border: none; outline: none; font-size: 15px; background: transparent; font-family: inherit; color: var(--text); }
+  .ai-note { text-align: center; font-size: 11px; color: var(--text-3); margin-top: 8px; }
 
-  .bottom-input {
-    flex-shrink: 0; padding: 8px 14px 30px; background: var(--bg);
-  }
-  .input-pill {
-    height: 50px; background: #fff; border-radius: 25px; display: flex; align-items: center; padding: 0 14px; gap: 10px;
-    box-shadow: 0 1px 6px rgba(0,0,0,.04);
-  }
-  .input-pill input { flex: 1; border: none; outline: none; font-size: 15px; background: transparent; font-family: inherit; }
-  .input-pill input::placeholder { color: var(--text-3); }
-  .ai-note { text-align: center; font-size: 11px; color: #c2c2c2; margin-top: 8px; }
-
-  /* ---------- 页面2 弹窗 ---------- */
-  .mask {
-    position: absolute; inset: 0; background: rgba(0,0,0,.45); z-index: 10;
-    opacity: 0; pointer-events: none; transition: opacity .25s;
-  }
-  .sheet {
-    position: absolute; left: 0; right: 0; bottom: 0; z-index: 11; background: #fff;
-    border-radius: 20px 20px 0 0; max-height: 88%; display: flex; flex-direction: column;
-    transform: translateY(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1);
-  }
-  .phone.open .mask { opacity: 1; pointer-events: auto; }
-  .phone.open .sheet { transform: translateY(0); }
-  .sheet.static { position: relative; transform: none; border-radius: 0; max-height: none; flex: 1; }
+  /* ---------- 遮罩 / 底部弹层 / 对话框 ---------- */
+  .mask { position: absolute; inset: 0; background: rgba(0,0,0,.45); z-index: 10; opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .phone.open-mask .mask { opacity: 1; pointer-events: auto; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 11; background: var(--card); border-radius: 20px 20px 0 0; max-height: 88%; display: flex; flex-direction: column; transform: translateY(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+  .sheet.show { transform: translateY(0); }
+  .sheet.static { position: relative; transform: none; border-radius: 0; max-height: none; flex: 1; min-height: 0; }
 
   .sheet-head { padding: 18px 18px 10px; position: relative; flex-shrink: 0; }
-  .sheet-grip { width: 36px; height: 4px; background: #e1e1e1; border-radius: 2px; position: absolute; top: 7px; left: 50%; transform: translateX(-50%); }
+  .sheet-grip { width: 36px; height: 4px; background: var(--line); border-radius: 2px; position: absolute; top: 7px; left: 50%; transform: translateX(-50%); }
   .sheet-title { font-size: 18px; font-weight: 700; padding-right: 30px; }
-  .sheet-sub { font-size: 12.5px; color: var(--text-2); margin-top: 4px; }
-  .sheet-close {
-    position: absolute; right: 14px; top: 14px; width: 28px; height: 28px; border-radius: 50%;
-    background: #f3f3f5; border: none; font-size: 15px; color: #666; cursor: pointer; line-height: 28px;
-  }
-  .sheet-body { overflow-y: auto; padding: 0 18px 8px; scrollbar-width: none; flex: 1; }
+  .sheet-sub { font-size: 12.5px; color: var(--text-2); margin-top: 5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .trust-inline { font-size: 11px; border-radius: 5px; padding: 1px 6px; font-weight: 600; }
+  .trust-inline.high { color: var(--green); background: var(--green-bg); }
+  .trust-inline.mid { color: var(--yellow); background: var(--yellow-bg); }
+  .trust-inline.low { color: var(--low); background: var(--low-bg); }
+  .trust-inline.none { color: var(--gray); background: var(--gray-bg); }
+  .sheet-close { position: absolute; right: 14px; top: 14px; width: 28px; height: 28px; border-radius: 50%; background: var(--chip); border: none; font-size: 14px; color: var(--text-2); cursor: pointer; }
+  .sheet-body { overflow-y: auto; padding: 0 18px 8px; scrollbar-width: none; flex: 1; min-height: 0; }
   .sheet-body::-webkit-scrollbar { display: none; }
-  .sec-title { font-size: 13px; font-weight: 600; color: #333; margin: 14px 0 8px; display: flex; justify-content: space-between; }
+  .sec-title { font-size: 13px; font-weight: 600; margin: 16px 0 8px; display: flex; justify-content: space-between; }
   .sec-title span { font-weight: 400; color: var(--text-3); font-size: 12px; }
 
-  .notes { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-  .notes::-webkit-scrollbar { display: none; }
-  .note { width: 108px; flex-shrink: 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #fff; }
-  .note-cover { height: 96px; display: flex; align-items: center; justify-content: center; font-size: 30px; position: relative; }
-  .note-cover em { position: absolute; left: 6px; bottom: 5px; font-style: normal; font-size: 9.5px; color: #fff; background: rgba(0,0,0,.35); border-radius: 4px; padding: 1px 4px; }
-  .note-title { font-size: 11.5px; line-height: 1.35; padding: 6px 7px 4px; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .note-meta { display: flex; align-items: center; gap: 4px; padding: 0 7px 7px; font-size: 10px; color: var(--text-2); }
-  .avatar { width: 16px; height: 16px; border-radius: 50%; color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 600; }
-  .note-meta .name { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .match { border-radius: 14px; padding: 12px 12px 8px; background: linear-gradient(135deg, var(--red-soft), var(--card)); border: 1px solid var(--red-line); }
+  .match-h { font-size: 14px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .link { border: none; background: none; color: var(--red); font-size: 12px; cursor: pointer; font-weight: 400; }
+  .match ul { list-style: none; }
+  .match li { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px; padding: 5px 0; line-height: 1.45; }
+  .match li.off { color: var(--text-3); }
+  .match-empty { font-size: 13px; color: var(--text-2); padding: 4px 0 6px; line-height: 1.5; }
 
-  .checks { list-style: none; border: 1px solid var(--line); border-radius: 12px; padding: 2px 12px; }
-  .checks li { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f3f3f3; }
-  .checks li:last-child { border-bottom: none; }
-  .ck { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 700; margin-top: 1px; }
+  .ck { width: 19px; height: 19px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; font-weight: 700; margin-top: 0; }
   .ck.ok { background: var(--green); }
   .ck.warn { background: #f0b429; }
-  .ck.bad { background: var(--orange); }
-  .ck-main { font-size: 14px; font-weight: 500; }
-  .ck-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+  .ck.bad { background: var(--low); }
+  .ck.muted { background: #c4c4c8; }
 
-  .score-box {
-    margin-top: 14px; border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 14px;
-    background: linear-gradient(135deg, #fff5f6, #fff);
-    border: 1px solid #ffe0e5;
-  }
-  .score-num { font-size: 34px; font-weight: 800; color: var(--red); line-height: 1; }
-  .score-num small { font-size: 15px; color: var(--text-3); font-weight: 500; }
-  .score-info { flex: 1; }
-  .score-info .lv { font-size: 13px; font-weight: 600; }
-  .score-bar { height: 6px; background: #f1f1f1; border-radius: 3px; margin: 6px 0 4px; overflow: hidden; }
-  .score-bar i { display: block; height: 100%; background: var(--red); border-radius: 3px; }
-  .score-info .hint { font-size: 11px; color: var(--text-3); }
-
-  .split { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 4px 0 6px; }
+  .checks { list-style: none; border: 1px solid var(--line); border-radius: 12px; padding: 2px 12px; }
+  .checks li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line-2); font-size: 14px; }
+  .checks li:last-child { border-bottom: none; }
+  .insufficient { background: var(--gray-bg); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--text-2); margin-bottom: 8px; line-height: 1.5; }
+  .split { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 10px 0 6px; }
   .split-legend { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-2); }
 
-  .sheet-foot { padding: 10px 18px 30px; flex-shrink: 0; border-top: 1px solid #f3f3f3; }
-  .btn-primary { width: 100%; height: 44px; border: none; border-radius: 22px; background: var(--red); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
-  .algo-note { font-size: 10.5px; color: var(--text-3); text-align: center; margin-top: 8px; }
+  .src-row { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line-2); cursor: pointer; align-items: flex-start; }
+  .src-row:last-child { border-bottom: none; }
+  .src-cover { width: 62px; height: 62px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .src-main { flex: 1; min-width: 0; }
+  .src-title { font-size: 13px; font-weight: 500; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .src-main .meta-tags { margin-top: 5px; }
+  .src-author { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-2); margin-top: 6px; }
+  .src-author .likes { margin-left: auto; color: var(--text-3); }
+  .avatar { width: 16px; height: 16px; border-radius: 50%; color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 600; }
+  .chev { color: var(--text-3); font-size: 18px; align-self: center; }
+  .src-row.gone { cursor: default; opacity: .65; }
+  .src-row.gone .src-cover { background: var(--gray-bg); font-size: 20px; }
+  .src-sub { font-size: 11.5px; color: var(--text-3); margin-top: 4px; }
 
-  /* ---------- 页面3 ---------- */
-  .brand-head { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; }
+  .sheet-foot { padding: 10px 18px 28px; flex-shrink: 0; border-top: 1px solid var(--line-2); }
+  .foot-btns { display: flex; gap: 10px; }
+  .btn-primary { flex: 1; width: 100%; height: 44px; border: none; border-radius: 22px; background: var(--red); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn-ghost { flex: 1; height: 44px; border: 1px solid var(--line); border-radius: 22px; background: var(--card); color: var(--text); font-size: 15px; cursor: pointer; }
+  .algo-note { font-size: 10.5px; color: var(--text-3); text-align: center; margin-top: 8px; line-height: 1.5; }
+
+  .fb-sheet-body { padding: 0 18px 6px; }
+  .reason { display: flex; align-items: center; justify-content: space-between; width: 100%; border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 12px; padding: 13px 14px; font-size: 14.5px; margin-bottom: 8px; cursor: pointer; text-align: left; }
+  .reason:hover { border-color: var(--red); color: var(--red); }
+  .reason span { color: var(--text-3); }
+  .pref-entry { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--red-soft); color: var(--red); font-size: 14px; font-weight: 600; cursor: pointer; border: none; width: 100%; text-align: left; }
+  .pref-entry small { font-weight: 400; color: var(--text-2); font-size: 11.5px; display: block; margin-top: 2px; }
+  .pref-entry b { margin-left: auto; font-weight: 400; }
+
+  .dialog { position: absolute; left: 34px; right: 34px; top: 50%; transform: translateY(-46%) scale(.96); opacity: 0; pointer-events: none; background: var(--card); border-radius: 16px; padding: 22px 18px 16px; z-index: 12; text-align: center; transition: all .22s; }
+  .dialog.show { opacity: 1; pointer-events: auto; transform: translateY(-50%); }
+  .dialog .d-ic { font-size: 30px; }
+  .dialog .d-t { font-size: 17px; font-weight: 700; margin: 6px 0; }
+  .dialog .d-s { font-size: 13px; color: var(--text-2); line-height: 1.55; margin-bottom: 16px; }
+  .dialog .d-btns { display: flex; gap: 10px; }
+  .dialog .d-btns button { height: 40px; font-size: 14px; }
+
+  /* ---------- 二级页面（偏好设置 / 笔记详情） ---------- */
+  .layer { position: absolute; inset: 0; background: var(--bg); z-index: 20; transform: translateX(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1); display: flex; flex-direction: column; }
+  .layer.show { transform: none; }
+  .prefs-static { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+  .pref-intro { font-size: 13px; color: var(--text-2); margin: 4px 2px 12px; }
+  .pref-sec { background: var(--card); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+  .pref-h { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+  .pref-h span { font-size: 11.5px; color: var(--text-3); font-weight: 400; margin-left: 4px; }
+  .pchips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pchip { border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 16px; padding: 6px 14px; font-size: 13px; cursor: pointer; }
+  .pchip.on { border-color: var(--red); color: var(--red); background: var(--red-soft); font-weight: 600; }
+  .pref-store { font-size: 11.5px; color: var(--text-3); text-align: center; margin: 4px 0 8px; }
+  .pref-foot { padding: 10px 16px 30px; flex-shrink: 0; }
+
+  .note-nav { background: var(--card); }
+  .note-nav .nm { font-size: 14px; font-weight: 600; flex: 1; display: flex; align-items: center; gap: 8px; }
+  .note-nav .avatar { width: 30px; height: 30px; font-size: 13px; }
+  .follow { border: 1px solid var(--red); color: var(--red); background: none; border-radius: 14px; padding: 3px 14px; font-size: 13px; }
+  .note-scroll { flex: 1; overflow-y: auto; background: var(--card); scrollbar-width: none; }
+  .note-scroll::-webkit-scrollbar { display: none; }
+  .note-big { height: 300px; display: flex; align-items: center; justify-content: center; font-size: 84px; position: relative; }
+  .coop-banner { position: absolute; left: 12px; top: 12px; font-size: 11.5px; background: rgba(0,0,0,.5); color: #fff; padding: 3px 8px; border-radius: 6px; }
+  .note-content { padding: 14px 16px; }
+  .n-title { font-size: 17px; font-weight: 700; line-height: 1.45; }
+  .n-body { font-size: 14.5px; line-height: 1.75; margin-top: 8px; }
+  .n-meta { margin-top: 10px; }
+  .n-cmt-h { font-size: 13px; color: var(--text-2); padding: 12px 16px 4px; border-top: 8px solid var(--bg); }
+  .n-cmt { display: flex; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line-2); }
+  .n-cmt .avatar { width: 28px; height: 28px; font-size: 12px; }
+  .n-cmt .u { font-size: 12px; color: var(--text-3); display: flex; gap: 6px; align-items: center; }
+  .n-cmt .c { font-size: 14px; margin-top: 3px; line-height: 1.5; }
+  .neg-tag { font-size: 10px; color: var(--low); background: var(--low-bg); border-radius: 4px; padding: 0 5px; }
+
+  .toast { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); background: rgba(0,0,0,.78); color: #fff; font-size: 13px; padding: 9px 16px; border-radius: 8px; z-index: 50; opacity: 0; pointer-events: none; transition: opacity .2s; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+
+  /* ---------- 内部：品牌内容诊断 ---------- */
+  #frameInternal { display: none; }
+  #frameInternal.visible { display: flex; }
+  .internal-badge { position: absolute; top: 50px; right: 16px; font-size: 10.5px; color: #fff; background: #555; border-radius: 4px; padding: 1px 6px; z-index: 3; }
+  .brand-head { display: flex; align-items: center; gap: 10px; background: var(--card); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; }
   .brand-logo { width: 38px; height: 38px; border-radius: 10px; background: #1f2937; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; }
   .brand-head .nm { font-size: 15px; font-weight: 600; }
   .brand-head .sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
   .brand-head .chip { margin-left: auto; font-size: 11.5px; border: 1px solid var(--line); border-radius: 12px; padding: 3px 9px; color: var(--text-2); }
-
-  .panel { background: #fff; border-radius: 16px; padding: 14px; margin-bottom: 10px; }
+  .panel { background: var(--card); border-radius: 16px; padding: 14px; margin-bottom: 10px; }
   .panel-title { font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
   .panel-title span { font-size: 11.5px; font-weight: 400; color: var(--text-3); }
   .cov-row { display: flex; align-items: flex-end; gap: 10px; margin-top: 10px; }
@@ -212,58 +338,56 @@
   .cov-txt { font-size: 12.5px; color: var(--text-2); line-height: 1.5; padding-bottom: 3px; }
   .cov-txt b { color: var(--text); }
   .dots { display: flex; gap: 5px; margin-top: 12px; }
-  .dots i { flex: 1; height: 8px; border-radius: 4px; background: #eeeeee; }
+  .dots i { flex: 1; height: 8px; border-radius: 4px; background: var(--chip); }
   .dots i.on { background: var(--red); }
-  .compare { display: flex; gap: 8px; margin-top: 12px; }
-  .compare div { flex: 1; background: #f7f7f9; border-radius: 10px; padding: 8px 10px; font-size: 11.5px; color: var(--text-2); }
-  .compare b { display: block; font-size: 15px; color: var(--text); margin-top: 2px; }
-
   .radar-wrap { display: flex; justify-content: center; margin: 4px 0 2px; }
-  .dim-list { margin-top: 4px; }
   .dim { display: flex; align-items: center; gap: 8px; padding: 7px 0; font-size: 13px; }
   .dim .n { width: 48px; flex-shrink: 0; }
-  .dim .bar { flex: 1; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+  .dim .bar { flex: 1; height: 8px; background: var(--chip); border-radius: 4px; overflow: hidden; }
   .dim .bar i { display: block; height: 100%; border-radius: 4px; }
   .dim .pct { width: 34px; text-align: right; font-weight: 600; font-size: 12.5px; }
   .dim .st { width: 50px; text-align: center; font-size: 11px; border-radius: 5px; padding: 2px 0; flex-shrink: 0; }
   .st.cover { color: var(--green); background: var(--green-bg); }
-  .st.gap { color: var(--orange); background: var(--orange-bg); }
-
+  .st.gap { color: var(--stale); background: var(--stale-bg); }
   .advice { background: linear-gradient(135deg, #ff2442, #ff5a6e); color: #fff; border-radius: 16px; padding: 14px; margin-bottom: 10px; }
-  .advice .h { font-size: 12px; opacity: .9; display: flex; align-items: center; gap: 5px; }
-  .advice .t { font-size: 15px; font-weight: 600; line-height: 1.5; margin: 6px 0 10px; }
-  .advice ul { list-style: none; font-size: 12px; line-height: 1.7; opacity: .95; margin-bottom: 12px; }
-  .advice ul li::before { content: "· "; }
-  .advice button { background: #fff; color: var(--red); border: none; border-radius: 16px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
-
-  .tabbar { flex-shrink: 0; height: 78px; background: #fff; border-top: 1px solid var(--line); display: flex; padding: 8px 0 30px; }
-  .tabbar div { flex: 1; text-align: center; font-size: 14px; color: var(--text-3); }
-  .tabbar div.on { color: var(--text); font-weight: 600; }
-
-  .toast {
-    position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); background: rgba(0,0,0,.75); color: #fff;
-    font-size: 13px; padding: 9px 16px; border-radius: 8px; z-index: 30; opacity: 0; pointer-events: none; transition: opacity .2s; white-space: nowrap;
-  }
-  .toast.show { opacity: 1; }
+  .advice .h { font-size: 12px; opacity: .9; }
+  .advice .t { font-size: 15px; font-weight: 600; line-height: 1.5; margin-top: 6px; }
 </style>
 </head>
 <body>
 
 <div class="canvas">
 
-  <!-- ================= 页面1：用户搜索界面 ================= -->
+  <!-- ================= 演示控制台（非产品界面） ================= -->
+  <div class="console">
+    <div class="c-title">演示控制台<span>不属于产品界面</span></div>
+    <label class="sw"><input type="checkbox" onchange="setDark(this.checked)">暗色模式</label>
+    <label class="sw"><input type="checkbox" id="swLogin" onchange="state.loggedIn = this.checked; renderAll()">已登录（偏好同步到云端）</label>
+    <label class="sw"><input type="checkbox" onchange="state.netError = this.checked">模拟网络异常（反馈失败）</label>
+    <label class="sw"><input type="checkbox" onchange="state.emptyFilter = this.checked; renderList()">模拟筛选后无结果</label>
+    <div class="c-btns">
+      <button onclick="clearPrefs()">清空偏好</button>
+      <button onclick="resetPrefs()">恢复默认偏好</button>
+      <button onclick="resetFeedback()">重置反馈</button>
+    </div>
+    <div class="c-sub">埋点日志 <button onclick="logs.length = 0; renderLogs()">清空</button></div>
+    <div class="logs" id="logs"></div>
+    <div class="c-hint">内部入口：连点 3 次页面1顶部的「点点」，或在网址后加 #internal，可以打开品牌内容诊断页。</div>
+  </div>
+
+  <!-- ================= 页面1：搜索界面（主流程） ================= -->
   <div class="frame-wrap">
-    <div class="frame-label">页面1 · 用户搜索界面<span>点击「可信度」弹出页面2</span></div>
+    <div class="frame-label">页面1 · 搜索界面<span>可点标签 / 反馈 / 筛选</span></div>
     <div class="phone" id="phone1">
       <div class="statusbar"><span>20:29</span><span class="icons">5G ▂▄▆ <span class="battery">73</span></span></div>
       <div class="navbar">
         <span class="back">‹</span>
         <div class="orb"></div>
-        <div class="title">点点</div>
+        <div class="title" id="ddTitle">点点</div>
         <span class="more">···</span>
       </div>
 
-      <div class="scroll">
+      <div class="scroll" id="scroll1">
         <div class="searchbar">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
           <input type="text" placeholder="搜索：油敏肌水乳推荐">
@@ -274,50 +398,59 @@
 
         <div class="ai-card">
           <div class="ai-intro">
-            综合了 <b>286 篇</b>相关笔记，为「油敏肌」挑了 3 款口碑集中的产品。每条推荐都标注了<b>内容来源</b>，你可以点右侧「可信度」查看依据 👇
+            综合了 <b>286 篇</b>相关笔记，挑了几款口碑集中的产品。每条都标出了<b>谁验证过、是不是合作、有没有吐槽</b>，点彩色标签能看到具体依据 👇
           </div>
-          <div class="legend">
-            <span><i style="background:var(--green)"></i>真实用户体验</span>
-            <span><i style="background:#f0b429"></i>品牌合作</span>
-            <span><i style="background:var(--orange)"></i>争议较大</span>
+          <div class="pref-bar" id="prefBar" onclick="openPrefs(this)"></div>
+
+          <div class="filter-row">
+            <button class="filter-chip" id="filterChip" onclick="toggleFilter()"><span class="box">✓</span>只看真实用户体验</button>
+            <button class="q-btn" id="qBtn" onclick="toggleTip(event)">?</button>
+            <div class="tip" id="tip">我们过滤了品牌合作内容和明显营销文案，只保留真实用户的独立体验。</div>
           </div>
 
           <div id="recList"></div>
 
           <div class="ai-actions">
-            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></div>
-            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linejoin="round"><path d="M14 5l7 7-7 7v-4c-6 0-9 2-11 5 1-6 4-10 11-11V5z"/></svg></div>
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></div>
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 5l7 7-7 7v-4c-6 0-9 2-11 5 1-6 4-10 11-11V5z"/></svg></div>
             <div class="sp"></div>
-            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.7a2 2 0 0 0-2 1.7l-1.4 9A2 2 0 0 0 4.3 15H10zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg></div>
-            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></div>
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></div>
           </div>
         </div>
 
-        <div class="suggest">只看「真实用户体验」的推荐</div><br>
-        <div class="suggest">学生党预算 100 元以内有哪些？</div>
+        <div class="suggest">学生党预算 100 元以内有哪些？</div><br>
+        <div class="suggest">干皮也能用这几款吗？</div>
       </div>
 
       <div class="bottom-input">
         <div class="input-pill">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M9 9.5c.8.7.8 4.3 0 5M12 8c1.6 1.3 1.6 6.7 0 8" stroke-linecap="round"/></svg>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M9 9.5c.8.7.8 4.3 0 5M12 8c1.6 1.3 1.6 6.7 0 8" stroke-linecap="round"/></svg>
           <input type="text" placeholder="发消息或按住说话...">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.6"><path d="M4 8h3l2-3h6l2 3h3v11H4z" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5"/></svg>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 7v10M7 12h10" stroke-linecap="round"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8h3l2-3h6l2 3h3v11H4z" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5"/></svg>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 7v10M7 12h10" stroke-linecap="round"/></svg>
         </div>
         <div class="ai-note">内容由AI生成</div>
       </div>
       <div class="home-indicator"></div>
 
-      <!-- 弹窗（页面2 交互态） -->
-      <div class="mask" onclick="closeSheet()"></div>
-      <div class="sheet" id="sheet"></div>
-      <div class="toast" id="toast1"></div>
+      <div class="mask" onclick="onMask(this)"></div>
+      <div class="sheet sheet-cred"></div>
+      <div class="sheet sheet-fb"></div>
+      <div class="dialog" id="streakDialog">
+        <div class="d-ic">🎯</div>
+        <div class="d-t">你更想要哪种推荐？</div>
+        <div class="d-s">你连续几次觉得推荐没用，告诉点点你的肤质、预算和使用场景，推荐会更准。</div>
+        <div class="d-btns">
+          <button class="btn-ghost" onclick="hideAll(this.closest('.phone'))">暂不</button>
+          <button class="btn-primary" onclick="openPrefs(this)">去设置偏好</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- ================= 页面2：可信度解释弹窗（展示态） ================= -->
   <div class="frame-wrap">
-    <div class="frame-label">页面2 · 可信度解释弹窗<span>展示态（类型A）</span></div>
+    <div class="frame-label">页面2 · 可信度解释弹窗<span>展示态（第 1 条推荐）</span></div>
     <div class="phone" id="phone2">
       <div class="statusbar"><span>20:29</span><span class="icons">5G ▂▄▆ <span class="battery">73</span></span></div>
       <div class="sheet static" id="sheetStatic"></div>
@@ -325,27 +458,33 @@
     </div>
   </div>
 
-  <!-- ================= 页面3：品牌侧内容差距诊断 ================= -->
+  <!-- ================= 页面3：偏好设置（展示态） ================= -->
   <div class="frame-wrap">
-    <div class="frame-label">页面3 · 品牌内容诊断<span>品牌侧（蒲公英/聚光后台）</span></div>
+    <div class="frame-label">页面3 · 偏好设置<span>从反馈弹窗 / 偏好条进入</span></div>
     <div class="phone" id="phone3">
       <div class="statusbar"><span>20:29</span><span class="icons">5G ▂▄▆ <span class="battery">73</span></span></div>
+      <div class="prefs-static prefs-root" id="prefsStatic"></div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- ================= 内部：品牌内容诊断（隐藏入口） ================= -->
+  <div class="frame-wrap" id="frameInternal">
+    <div class="frame-label">内部测试 · 品牌内容诊断<span>不对普通用户开放</span></div>
+    <div class="phone" id="phone4">
+      <div class="statusbar"><span>20:29</span><span class="icons">5G ▂▄▆ <span class="battery">73</span></span></div>
+      <div class="internal-badge">INTERNAL</div>
       <div class="navbar">
-        <span class="back">‹</span>
-        <div class="title" style="text-align:center">品牌内容诊断</div>
+        <span class="back" onclick="hideInternal()">‹</span>
+        <div class="title center">品牌内容诊断</div>
         <span class="more">···</span>
       </div>
-
       <div class="scroll">
         <div class="brand-head">
           <div class="brand-logo">安</div>
-          <div>
-            <div class="nm">安澜 ANLAN</div>
-            <div class="sub">护肤 · 已认证品牌号</div>
-          </div>
+          <div><div class="nm">安澜 ANLAN</div><div class="sub">护肤 · 已认证品牌号</div></div>
           <div class="chip">近 30 天 ▾</div>
         </div>
-
         <div class="panel">
           <div class="panel-title">搜索词覆盖率 <span>AI 回答抽样 10 次</span></div>
           <div class="cov-row">
@@ -353,248 +492,555 @@
             <div class="cov-txt">在「<b>油敏肌水乳</b>」下<br>你的品牌被 AI 提及 <b>2/10</b> 次</div>
           </div>
           <div class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          <div class="compare">
-            <div>品类头部均值<b>6.4 / 10</b></div>
-            <div>被提及时标签<b style="color:var(--yellow)">🏷️ 品牌合作</b></div>
-          </div>
         </div>
-
         <div class="panel">
           <div class="panel-title">需求维度覆盖 <span>基于 286 篇用户笔记</span></div>
           <div class="radar-wrap"><svg id="radar" width="300" height="244" viewBox="0 0 300 244"></svg></div>
-          <div class="dim-list" id="dimList"></div>
+          <div id="dimList"></div>
         </div>
-
         <div class="advice">
           <div class="h">💡 优化建议</div>
           <div class="t">建议补充「不假滑」和「温和度」维度的真实体验内容</div>
-          <ul>
-            <li>这两个维度是油敏肌用户高频追问点，当前内容缺口最大</li>
-            <li>优先邀请真实用户做长周期（≥14 天）体验，避免模板化文案</li>
-            <li>品牌合作内容会被标注，独立体验更易被 AI 引用</li>
-          </ul>
-          <button onclick="toast('toast3','已生成内容 Brief（演示）')">生成内容 Brief →</button>
         </div>
       </div>
-
-      <div class="tabbar">
-        <div>概览</div><div class="on">内容诊断</div><div>投放</div><div>我的</div>
-      </div>
       <div class="home-indicator"></div>
-      <div class="toast" id="toast3"></div>
     </div>
   </div>
 
 </div>
 
 <script>
-  /* ---------------- Mock 数据 ---------------- */
-  const recs = [
-    {
-      id: 'A', cat: '水乳', name: 'John Jeff 油橄榄水乳', emoji: '🫒',
-      thumbBg: 'linear-gradient(135deg,#e3f3d8,#b9dea0)',
-      desc: '清爽不黏腻，多位用户反馈连用 2 周闭口减少',
-      tag: '✅ 来自12位真实用户的独立体验', score: 8.7, btn: ''
-    },
-    {
-      id: 'B', cat: '防晒', name: '安澜 清透控油防晒乳', emoji: '☀️',
-      thumbBg: 'linear-gradient(135deg,#fff2c9,#ffd77a)',
-      desc: '成膜快、不搓泥，主打油皮夏季日常通勤',
-      tag: '🏷️ 品牌合作内容', score: 6.1, btn: 'mid'
-    },
-    {
-      id: 'C', cat: '精华', name: '初研 烟酰胺控油精华', emoji: '💧',
-      thumbBg: 'linear-gradient(135deg,#dcecff,#a9cdfa)',
-      desc: '控油效果明显，但耐受差异大，建议先局部试用',
-      tag: '⚠️ 争议较大，正反体验差异明显', score: 5.4, btn: 'low'
-    }
-  ];
+  /* ================= Mock 数据 ================= */
+  const SCENES = ['日常通勤', '运动健身', '约会聚会', '熬夜加班', '旅行出差'];
+  const DEFAULT_PREFS = { skin: '油皮', budget: 100, scenes: ['日常通勤'], acceptCoop: true };
 
-  const avatarColors = ['#ff7a8a', '#6aa8ff', '#ffb347', '#7bc67e', '#b48cf2'];
-
-  const detail = {
-    A: {
-      title: '这条推荐为什么可信？',
-      sub: 'John Jeff 油橄榄水乳 · 综合 12 位用户的独立体验',
-      notes: [
-        { t: '油敏肌空瓶记录｜连用21天闭口变少了', a: '橘子汽水', likes: '2.3k', e: '🫒', bg: 'linear-gradient(135deg,#e8f5df,#c2e3a8)', d: '21天' },
-        { t: '夏天也不闷！混油T区真实反馈', a: 'Momo不熬夜', likes: '856', e: '🧴', bg: 'linear-gradient(135deg,#fdf0e1,#f7d1a8)', d: '14天' },
-        { t: '敏感期用了两周的碎碎念', a: '阿梨', likes: '412', e: '🌿', bg: 'linear-gradient(135deg,#e2f1f7,#b4d9ea)', d: '14天' }
-      ],
-      checks: [
-        ['ok', '已验证购买记录', '12 位作者中 11 位有站内/电商订单记录'],
-        ['ok', '互动行为正常（非集中刷量）', '点赞、收藏增长曲线自然，无异常峰值'],
-        ['ok', '内容相似度低（非模板化）', '文本相似度均值 12%，低于品类 35%'],
-        ['ok', '多源独立佐证（≥3位不同用户）', '12 位无关联账号，无共同 MCN']
-      ],
-      score: 8.7, lv: '高可信 · 可放心参考'
-    },
-    B: {
-      title: '这条推荐的来源说明',
-      sub: '安澜 清透控油防晒乳 · 主要来自品牌合作笔记',
-      notes: [
-        { t: '油皮通勤防晒天花板？真的不搓泥', a: '美妆研究所', likes: '5.1k', e: '☀️', bg: 'linear-gradient(135deg,#fff4d1,#ffd982)', d: '合作' },
-        { t: '夏日防晒测评｜成膜速度实测', a: 'Lily护肤日记', likes: '1.2k', e: '🧪', bg: 'linear-gradient(135deg,#ffeedd,#ffc79c)', d: '合作' },
-        { t: '学生党平价防晒，用了一个月', a: '小鹿不迷路', likes: '233', e: '🎒', bg: 'linear-gradient(135deg,#eaf3ff,#bcd6fb)', d: '独立' }
-      ],
-      checks: [
-        ['warn', '已验证购买记录', '9 篇引用笔记中仅 2 篇有购买记录'],
-        ['ok', '互动行为正常（非集中刷量）', '未发现集中刷量行为'],
-        ['warn', '内容相似度低（非模板化）', '7 篇合作笔记卖点表述相似度 58%'],
-        ['bad', '多源独立佐证（≥3位不同用户）', '独立用户体验仅 2 位，不足 3 位']
-      ],
-      score: 6.1, lv: '中等可信 · 含商业合作'
-    },
-    C: {
-      title: '这条推荐为什么有争议？',
-      sub: '初研 烟酰胺控油精华 · 正反体验差异明显',
-      notes: [
-        { t: '控油真的绝！大油田救星', a: '油皮小王', likes: '1.8k', e: '👍', bg: 'linear-gradient(135deg,#e3f6ea,#b6e4c6)', d: '正向' },
-        { t: '踩雷了…用三天脸颊泛红刺痛', a: '芋圆圆', likes: '1.5k', e: '👎', bg: 'linear-gradient(135deg,#ffe6dc,#ffbea3)', d: '负向' },
-        { t: '建立耐受后再用，我的使用方法', a: '成分党阿杰', likes: '967', e: '📋', bg: 'linear-gradient(135deg,#eef0ff,#c7cdfb)', d: '中立' }
-      ],
-      checks: [
-        ['ok', '已验证购买记录', '引用的 18 位作者中 15 位有购买记录'],
-        ['ok', '互动行为正常（非集中刷量）', '未发现异常互动'],
-        ['ok', '内容相似度低（非模板化）', '内容多为个人真实描述'],
-        ['bad', '体验结论一致性', '正向 52% / 负向 41%，结论分歧大']
-      ],
-      split: [52, 7, 41],
-      score: 5.4, lv: '谨慎参考 · 因人而异'
-    }
+  const notes = {
+    a1: { t: '油敏肌空瓶记录｜连用21天闭口变少了', a: '橘子汽水', likes: '2.3k', days: 21, coop: false, complaints: [], e: '🫒', bg: 'linear-gradient(135deg,#e8f5df,#c2e3a8)',
+          body: '混油敏感肌，夏天最怕闷。这瓶用了三周，质地是清爽的啫喱乳，上脸很快吸收，T 区下午也不会油到反光。下巴的闭口少了一大半，没有刺痛泛红。自费买的，不是广告～' },
+    a2: { t: '夏天也不闷！混油T区真实反馈', a: 'Momo不熬夜', likes: '856', days: 14, coop: false, complaints: ['T区下午还是会出点油，要备吸油纸'], e: '🧴', bg: 'linear-gradient(135deg,#fdf0e1,#f7d1a8)',
+          body: '通勤党，早上水乳+防晒就出门。两周下来最大的感受是不闷，上妆也不搓泥。唯一的小缺点是 T 区到下午还是会有点油光。' },
+    a3: { t: '敏感期用了两周的碎碎念', a: '阿梨', likes: '412', days: 30, coop: false, complaints: [], e: '🌿', bg: 'linear-gradient(135deg,#e2f1f7,#b4d9ea)',
+          body: '换季泛红期间试的，原本担心刺激，结果一点都没有。保湿力中等，干皮可能要再叠面霜。' },
+    b1: { t: '油皮通勤防晒天花板？真的不搓泥', a: '美妆研究所', likes: '5.1k', days: 38, coop: true, complaints: ['用到第二周开始搓泥了', '下午T区还是会反光', '叠粉底有点假白'], e: '☀️', bg: 'linear-gradient(135deg,#fff4d1,#ffd982)',
+          body: '本篇为品牌合作。这支防晒成膜很快，号称 30 秒成膜，实测确实不黏手，适合赶时间的通勤族。' },
+    b2: { t: '夏日防晒测评｜成膜速度实测', a: 'Lily护肤日记', likes: '1.2k', days: 45, coop: true, complaints: ['测评只用了一天，参考价值有限', '和我自己用的感受差很多'], e: '🧪', bg: 'linear-gradient(135deg,#ffeedd,#ffc79c)',
+          body: '本篇为品牌合作。横向对比了 5 款防晒的成膜速度，安澜这支排第二。' },
+    b3: { deleted: true },
+    c1: { t: '控油真的绝！大油田救星', a: '油皮小王', likes: '1.8k', days: 9, coop: false, complaints: ['我用了会刺痛', '浓度是不是太高了'], e: '👍', bg: 'linear-gradient(135deg,#e3f6ea,#b6e4c6)',
+          body: '大油田一枚，用了一周，中午不用补妆了！毛孔看起来也细了。不过身边有朋友用了泛红，大家量力而行。' },
+    c2: { t: '踩雷了…用三天脸颊泛红刺痛', a: '芋圆圆', likes: '1.5k', days: 12, coop: false, complaints: ['我也是，停了才好', '烟酰胺不耐受的千万别冲', '一模一样的症状', '早知道先局部试了', '客服说要建立耐受'], e: '👎', bg: 'linear-gradient(135deg,#ffe6dc,#ffbea3)',
+          body: '冲着控油买的，第三天两颊开始发红发烫，停用一周才恢复。建议敏感肌先在耳后试几天。' },
+    c3: { t: '建立耐受后再用，我的使用方法', a: '成分党阿杰', likes: '967', days: 20, coop: false, complaints: [], e: '📋', bg: 'linear-gradient(135deg,#eef0ff,#c7cdfb)',
+          body: '烟酰胺浓度不低，第一周隔天用、只涂 T 区，第二周再全脸。按这个节奏我没有出现不适。' },
+    d1: { t: '新品试用｜积雪草乳液初体验', a: '小葵', likes: '128', days: 5, coop: null, complaints: null, e: '🌱', bg: 'linear-gradient(135deg,#e5f6ee,#bfe8d3)',
+          body: '刚上市的新品，用了 3 天，质地挺温和的，效果还要再观察。' },
+    d2: { t: '敏感肌新品开箱，先用三天看看', a: '新品试用官', likes: '56', days: 3, coop: true, complaints: [], e: '📦', bg: 'linear-gradient(135deg,#f1ecff,#d6caf7)',
+          body: '品牌寄送的试用装，先记录开箱和第一印象。' }
   };
 
-  /* ---------------- 页面1 渲染 ---------------- */
-  document.getElementById('recList').innerHTML = recs.map(r => `
-    <div class="rec">
-      <div class="rec-thumb" style="background:${r.thumbBg}">${r.emoji}</div>
-      <div class="rec-body">
-        <div class="rec-top">
-          <div class="rec-name">${r.name}</div>
+  const recs = [
+    { id: 'A', cat: '水乳', name: 'John Jeff 油橄榄水乳', price: 89, emoji: '🫒', thumbBg: 'linear-gradient(135deg,#e3f3d8,#b9dea0)',
+      desc: '清爽不黏腻，多位用户反馈连用 2 周闭口减少', score: 8.7, verified: 12,
+      skins: ['油皮', '混合皮', '敏感皮'], scenes: ['日常通勤', '熬夜加班'],
+      meta: { days: 21, coop: false, complaints: [] }, notes: ['a1', 'a2', 'a3'] },
+    { id: 'B', cat: '防晒', name: '安澜 清透控油防晒乳', price: 139, emoji: '☀️', thumbBg: 'linear-gradient(135deg,#fff2c9,#ffd77a)',
+      desc: '成膜快、不搓泥，主打油皮夏季日常通勤', score: 6.1,
+      skins: ['油皮', '混合皮'], scenes: ['日常通勤', '运动健身', '旅行出差'],
+      meta: { days: 38, coop: true, complaints: ['用到第二周开始搓泥了', '下午T区还是会反光', '叠粉底有点假白'] }, notes: ['b1', 'b2', 'b3'] },
+    { id: 'C', cat: '精华', name: '初研 烟酰胺控油精华', price: 159, emoji: '💧', thumbBg: 'linear-gradient(135deg,#dcecff,#a9cdfa)',
+      desc: '控油效果明显，但耐受差异大', score: 5.4,
+      skins: ['油皮'], scenes: ['日常通勤'],
+      meta: { days: 9, coop: false, complaints: ['用三天脸颊泛红刺痛', '停用一周才恢复', '烟酰胺不耐受的千万别冲', '浓度太高了', '用了会刺痛', '敏感肌慎入', '早知道先局部试了'] }, notes: ['c1', 'c2', 'c3'] },
+    { id: 'D', cat: '乳液', name: '禾初 积雪草舒缓乳', price: 75, emoji: '🌱', thumbBg: 'linear-gradient(135deg,#e5f6ee,#bfe8d3)',
+      desc: '新上市，主打敏感肌舒缓，相关笔记还很少', score: null,
+      skins: ['敏感皮', '干皮'], scenes: ['日常通勤'],
+      meta: { days: null, coop: null, complaints: null }, notes: ['d1', 'd2'] }
+  ];
+
+  const verify = {
+    A: { list: [['ok', '12 个网友都晒过购买记录'], ['ok', '评论区互动自然，不像批量刷的'], ['ok', '不是复制粘贴的套路文案'], ['ok', '12 个不同网友都说过类似体验']] },
+    B: { list: [['warn', '只有 2 个网友晒过购买记录'], ['ok', '评论区互动自然，不像批量刷的'], ['warn', '7 篇合作笔记说法很像，有套路文案的痕迹'], ['bad', '只有 2 个不同网友说过类似体验，还不够多']] },
+    C: { list: [['ok', '15 个网友都晒过购买记录'], ['ok', '评论区互动自然，不像批量刷的'], ['ok', '不是复制粘贴的套路文案'], ['bad', '说好用和说踩雷的人差不多各一半']], split: [52, 7, 41] },
+    D: { insufficient: true, list: [['muted', '只有 2 篇笔记提到它，还看不出靠不靠谱']] }
+  };
+
+  const praise = ['同款油皮，确实清爽', '收藏了，准备入', '请问敏感肌能用吗？', '已下单，坐等到货'];
+  const avatarColors = ['#ff7a8a', '#6aa8ff', '#ffb347', '#7bc67e', '#b48cf2', '#4fc3c8'];
+
+  /* ================= 状态 ================= */
+  const state = {
+    prefs: loadPrefs(), loggedIn: false, netError: false, emptyFilter: false, filterOn: false,
+    feedback: {}, fbError: {}, fbTarget: null, downStreak: 0, popup: null
+  };
+  const logs = [];
+
+  function loadPrefs() {
+    try { const s = localStorage.getItem('dd_prefs'); if (s) return JSON.parse(s); } catch (e) {}
+    return { ...DEFAULT_PREFS, scenes: [...DEFAULT_PREFS.scenes] };
+  }
+  function storePrefs() { try { localStorage.setItem('dd_prefs', JSON.stringify(state.prefs)); } catch (e) {} }
+
+  /* ================= 工具 ================= */
+  const $ = s => document.querySelector(s);
+  const phone1 = () => $('#phone1');
+  const recById = id => recs.find(r => r.id === id);
+  const budgetLabel = b => b === 0 ? '不限' : `${b} 元以内`;
+  const statusbar = () => `<div class="statusbar"><span>20:29</span><span class="icons">5G ▂▄▆ <span class="battery">73</span></span></div>`;
+  function avatar(name, size) {
+    let h = 0; for (const ch of name) h = (h + ch.charCodeAt(0)) % avatarColors.length;
+    return `<div class="avatar" style="background:${avatarColors[h]}">${name[0]}</div>`;
+  }
+  const shieldIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V5l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke-linecap="round"/></svg>`;
+
+  function toast(ph, msg) {
+    const t = ph.querySelector('.toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1600);
+  }
+
+  function track(event, fields) {
+    const time = new Date().toTimeString().slice(0, 8);
+    logs.unshift({ time, event, fields });
+    console.log('[track]', event, fields);
+    renderLogs();
+  }
+  function renderLogs() {
+    $('#logs').innerHTML = logs.length
+      ? logs.slice(0, 40).map(l => `<div class="lg"><i>${l.time}</i><b>${l.event}</b><br>${JSON.stringify(l.fields)}</div>`).join('')
+      : '<div class="empty-log">还没有事件，去页面1点一点试试</div>';
+  }
+
+  /* ================= 文案规则 ================= */
+  // 按后台可信度分区间匹配标签文案
+  function trustOf(r) {
+    if (r.score == null) return { cls: 'none', text: '暂无足够验证数据' };
+    if (r.score >= 8) return { cls: 'high', text: `${r.verified} 位真实用户验证过` };
+    if (r.score >= 6) return { cls: 'mid', text: '品牌合作内容，建议对比参考' };
+    return { cls: 'low', text: '争议较大，建议先局部试用' };
+  }
+
+  function timeLabel(days, short) {
+    if (days == null) return { text: '—', stale: false };
+    if (days > 30) {
+      const m = Math.floor(days / 30);
+      return { text: short ? `${m} 个月前 · 可能已过期` : `${m} 个月前发布（信息可能已过期）`, stale: true };
+    }
+    return { text: short ? `${days} 天前` : `${days} 天前发布`, stale: false };
+  }
+
+  function metaTagsHTML(m, short) {
+    const t = timeLabel(m.days, short);
+    const coop = m.coop == null ? '<span class="mt">—</span>'
+      : m.coop ? '<span class="mt coop">🏷️ 品牌合作</span>' : '<span class="mt">无合作标识</span>';
+    let comp;
+    if (m.complaints == null) comp = '<span class="mt">—</span>';
+    else if (!m.complaints.length) comp = '<span class="mt good">无负面反馈</span>';
+    else comp = `<button class="mt bad" onclick="toggleComplaints(event, this)"><i class="dot"></i>有 ${m.complaints.length} 条吐槽 <em>▾</em></button>`;
+    const box = m.complaints && m.complaints.length
+      ? `<div class="complaints"><div class="cp-h">吐槽内容（来自评论区）</div>${m.complaints.map(c => `<div class="cp">“${c}”</div>`).join('')}</div>` : '';
+    return `<div class="meta-wrap"><div class="meta-tags"><span class="mt ${t.stale ? 'stale' : ''}">🕒 ${t.text}</span>${coop}${comp}</div>${box}</div>`;
+  }
+
+  function toggleComplaints(e, btn) {
+    e.stopPropagation();
+    btn.classList.toggle('open');
+    btn.closest('.meta-wrap').querySelector('.complaints').classList.toggle('show');
+  }
+
+  /* ================= 页面1：列表 ================= */
+  function visibleRecs() {
+    let list = recs.slice(), hiddenByPref = 0;
+    if (state.prefs && !state.prefs.acceptCoop) {
+      const n = list.length; list = list.filter(r => !r.meta.coop); hiddenByPref = n - list.length;
+    }
+    if (state.filterOn) {
+      list = list.filter(r => !r.meta.coop);
+      if (state.emptyFilter) list = [];
+    }
+    return { list, hiddenByPref };
+  }
+
+  function fbRowHTML(id) {
+    const fb = state.feedback[id];
+    if (fb) return `<span class="fb-done">✓ 已反馈：${fb.v === 'up' ? '有用' : `没用（${fb.reason}）`} · 今天不再打扰</span>`;
+    return `<span class="fb-q">这条推荐对你有用吗？</span>
+      <button class="fb-btn" onclick="fbUp('${id}')">👍 有用</button>
+      <button class="fb-btn" onclick="fbDown('${id}')">👎 没用</button>
+      ${state.fbError[id] ? '<span class="fb-err">⚠ 反馈失败，请重试</span>' : ''}`;
+  }
+
+  function cardHTML(r, idx) {
+    const tr = trustOf(r);
+    return `<div class="rec ${r.meta.coop ? 'is-coop' : ''}" data-id="${r.id}">
+      <div class="rec-top">
+        <div class="rec-thumb" style="background:${r.thumbBg}">${r.emoji}</div>
+        <div class="rec-body">
+          <div class="rec-name"><span>${r.name}</span><em>¥${r.price}</em></div>
+          <div class="rec-desc"><span class="rec-cat">${r.cat}</span>${r.desc}</div>
         </div>
-        <div class="rec-desc"><span class="rec-cat">${r.cat}</span> ${r.desc}</div>
       </div>
-      <button class="cred-btn ${r.btn}" onclick="openSheet('${r.id}')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V5l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke-linecap="round"/></svg>
-        可信度<b>${r.score}</b>
-      </button>
-      <div class="rec-foot"><span class="from">来源</span><span class="src-tag src-${r.id}">${r.tag}</span></div>
-    </div>`).join('');
+      <button class="trust ${tr.cls}" onclick="openCred('${r.id}', ${idx + 1})">${shieldIcon}<span>${tr.text}</span><em>看依据 ›</em></button>
+      ${metaTagsHTML(r.meta, false)}
+      <div class="fb-row">${fbRowHTML(r.id)}</div>
+    </div>`;
+  }
 
-  /* ---------------- 页面2 渲染 ---------------- */
-  function sheetHTML(id, isStatic) {
-    const d = detail[id];
-    const scoreColor = d.score >= 8 ? 'var(--red)' : d.score >= 6 ? '#e0a200' : 'var(--orange)';
-    const splitHTML = d.split ? `
-      <div class="sec-title">用户体验分布 <span>18 位用户</span></div>
+  let observer;
+  function renderList() {
+    const { list, hiddenByPref } = visibleRecs();
+    let html = '';
+    if (hiddenByPref) html += `<div class="filter-note">已按你的偏好隐藏 ${hiddenByPref} 条品牌合作内容</div>`;
+    if (!list.length) {
+      html += `<div class="empty"><div>🔍</div>暂无符合条件的推荐，建议关闭筛选器查看<br><button onclick="toggleFilter()">关闭筛选</button></div>`;
+    } else {
+      html += list.map((r, i) => cardHTML(r, i)).join('');
+    }
+    $('#recList').innerHTML = html;
+    $('#filterChip').classList.toggle('on', state.filterOn);
+    document.querySelectorAll('#recList .fb-row').forEach(el => observer.observe(el));
+  }
+
+  function renderPrefBar() {
+    const p = state.prefs;
+    $('#prefBar').innerHTML = p
+      ? `🎯<span>按你的偏好推荐：${p.skin} · ${budgetLabel(p.budget)}${p.scenes.length ? ' · ' + p.scenes.join('/') : ''}</span><em>修改 ›</em>`
+      : `🎯<span>还不知道你的偏好，推荐基于热门内容</span><em>去设置 ›</em>`;
+  }
+
+  /* ---- 筛选器 ---- */
+  function toggleFilter() {
+    state.filterOn = !state.filterOn;
+    renderList();
+    track('use_filter', { filter_type: 'only_real_user', on: state.filterOn, result_count: visibleRecs().list.length });
+  }
+  let tipTimer;
+  function toggleTip(e) {
+    e.stopPropagation();
+    const tip = $('#tip');
+    tip.classList.toggle('show');
+    clearTimeout(tipTimer);
+    if (tip.classList.contains('show')) tipTimer = setTimeout(() => tip.classList.remove('show'), 3000);
+  }
+  document.addEventListener('click', e => {
+    const tip = $('#tip');
+    if (tip.classList.contains('show') && !tip.contains(e.target)) tip.classList.remove('show');
+  });
+
+  /* ================= 页面2：可信度解释弹窗 ================= */
+  function matchHTML(r) {
+    const p = state.prefs;
+    if (!p) return `<div class="match"><div class="match-h">🎯 适不适合你</div>
+        <div class="match-empty">暂无你的偏好信息，推荐基于热门内容生成</div>
+        <button class="link" style="padding:2px 0 6px" onclick="openPrefs(this)">设置偏好，让推荐更准 ›</button></div>`;
+    const items = [];
+    items.push(r.skins.includes(p.skin)
+      ? [1, `匹配你的肤质（${p.skin}）`]
+      : [0, `不太适合你的肤质（${p.skin}），更适合${r.skins.join('/')}`]);
+    const okB = p.budget === 0 || r.price <= p.budget;
+    items.push([okB ? 1 : 0, `${okB ? '匹配' : '超出'}你的预算（${budgetLabel(p.budget)}）· 约 ¥${r.price}`]);
+    if (p.scenes.length) {
+      const inter = r.scenes.filter(s => p.scenes.includes(s));
+      items.push(inter.length ? [1, `匹配你的使用场景（${inter.join('、')}）`] : [0, `没提到你的使用场景（${p.scenes.join('、')}）`]);
+    }
+    const all = items.every(i => i[0]);
+    return `<div class="match">
+      <div class="match-h">🎯 ${all ? '这条推荐匹配你的需求' : '和你的需求匹配情况'}<button class="link" onclick="openPrefs(this)">修改偏好 ›</button></div>
+      <ul>${items.map(i => `<li class="${i[0] ? '' : 'off'}"><span class="ck ${i[0] ? 'ok' : 'muted'}">${i[0] ? '✓' : '!'}</span>${i[1]}</li>`).join('')}</ul>
+    </div>`;
+  }
+
+  function verifyHTML(rid) {
+    const v = verify[rid];
+    let html = v.insufficient ? '<div class="insufficient">📭 这条推荐的验证数据还不够多，建议多对比几条</div>' : '';
+    html += `<ul class="checks">${v.list.map(c => `<li><span class="ck ${c[0]}">${c[0] === 'ok' ? '✓' : '!'}</span>${c[1]}</li>`).join('')}</ul>`;
+    if (v.split) html += `
       <div class="split">
-        <i style="width:${d.split[0]}%;background:var(--green)"></i>
-        <i style="width:${d.split[1]}%;background:#d9d9d9"></i>
-        <i style="width:${d.split[2]}%;background:var(--orange)"></i>
+        <i style="width:${v.split[0]}%;background:var(--green)"></i><i style="width:${v.split[1]}%;background:#c4c4c8"></i><i style="width:${v.split[2]}%;background:var(--low)"></i>
       </div>
-      <div class="split-legend"><span>👍 正向 ${d.split[0]}%</span><span>中立 ${d.split[1]}%</span><span>👎 负向 ${d.split[2]}%</span></div>` : '';
+      <div class="split-legend"><span>👍 说好用 ${v.split[0]}%</span><span>说不清 ${v.split[1]}%</span><span>👎 说踩雷 ${v.split[2]}%</span></div>`;
+    return html;
+  }
 
+  function noteRowHTML(id) {
+    const n = notes[id];
+    if (n.deleted) return `<div class="src-row gone"><div class="src-cover">🚫</div>
+        <div class="src-main"><div class="src-title">该内容已不可见</div><div class="src-sub">笔记已被作者删除或下架</div></div></div>`;
+    return `<div class="src-row" onclick="openNote(this, '${id}')">
+      <div class="src-cover" style="background:${n.bg}">${n.e}</div>
+      <div class="src-main">
+        <div class="src-title">${n.t}</div>
+        ${metaTagsHTML(n, true)}
+        <div class="src-author">${avatar(n.a)}<span>${n.a}</span><span class="likes">♡ ${n.likes} 赞</span></div>
+      </div>
+      <span class="chev">›</span>
+    </div>`;
+  }
+
+  function sheetHTML(rid) {
+    const r = recById(rid), tr = trustOf(r);
     return `
       <div class="sheet-head">
-        ${isStatic ? '' : '<div class="sheet-grip"></div>'}
-        <div class="sheet-title">${d.title}</div>
-        <div class="sheet-sub">${d.sub}</div>
-        <button class="sheet-close" onclick="closeSheet()">✕</button>
+        <div class="sheet-grip"></div>
+        <div class="sheet-title">这条推荐为什么可信？</div>
+        <div class="sheet-sub">${r.name}<span class="trust-inline ${tr.cls}">${tr.text}</span></div>
+        <button class="sheet-close" onclick="closeCred(this)">✕</button>
       </div>
       <div class="sheet-body">
-        <div class="sec-title">引用的笔记 <span>查看全部 ›</span></div>
-        <div class="notes">
-          ${d.notes.map((n, i) => `
-            <div class="note">
-              <div class="note-cover" style="background:${n.bg}">${n.e}<em>${n.d}</em></div>
-              <div class="note-title">${n.t}</div>
-              <div class="note-meta">
-                <div class="avatar" style="background:${avatarColors[i]}">${n.a[0]}</div>
-                <span class="name">${n.a}</span><span>♡ ${n.likes}</span>
-              </div>
-            </div>`).join('')}
-        </div>
-        ${splitHTML}
-        <div class="sec-title">验证维度</div>
-        <ul class="checks">
-          ${d.checks.map(c => `
-            <li>
-              <div class="ck ${c[0]}">${c[0] === 'ok' ? '✓' : '!'}</div>
-              <div><div class="ck-main">${c[1]}</div><div class="ck-sub">${c[2]}</div></div>
-            </li>`).join('')}
-        </ul>
-        <div class="score-box">
-          <div class="score-num" style="color:${scoreColor}">${d.score}<small>/10</small></div>
-          <div class="score-info">
-            <div class="lv">综合可信度评分</div>
-            <div class="hint" style="color:${scoreColor};margin-top:2px">${d.lv}</div>
-            <div class="score-bar"><i style="width:${d.score * 10}%;background:${scoreColor}"></i></div>
-            <div class="hint">购买验证 30% · 互动真实 25% · 原创度 20% · 独立佐证 25%</div>
-          </div>
-        </div>
+        ${matchHTML(r)}
+        <div class="sec-title">大家怎么说</div>
+        ${verifyHTML(rid)}
+        <div class="sec-title">引用的笔记 <span>共 ${r.notes.length} 篇 · 点击看原文</span></div>
+        <div>${r.notes.map(noteRowHTML).join('')}</div>
       </div>
       <div class="sheet-foot">
-        <button class="btn-primary" onclick="closeSheet()">关闭</button>
-        <div class="algo-note">评分由算法根据公开数据计算，仅供参考 · <u>反馈问题</u></div>
+        <div class="foot-btns">
+          <button class="btn-ghost" onclick="viewAll(this, '${rid}')">查看全部</button>
+          <button class="btn-primary" onclick="closeCred(this)">关闭</button>
+        </div>
+        <div class="algo-note">${r.score != null ? `参考分 ${r.score}/10 · ` : ''}由算法综合购买记录、互动情况、原创程度、多人佐证计算，仅供参考</div>
       </div>`;
   }
 
-  function openSheet(id) {
-    document.getElementById('sheet').innerHTML = sheetHTML(id, false);
-    document.getElementById('phone1').classList.add('open');
+  function openCred(rid, pos) {
+    const ph = phone1();
+    ph.querySelector('.sheet-cred').innerHTML = sheetHTML(rid);
+    state.popup = { rid, t: Date.now() };
+    track('click_trust_tag', { rec_id: rid, label: trustOf(recById(rid)).text, position: pos });
+    track('popup_open', { rec_id: rid });
+    showSheet(ph, '.sheet-cred');
   }
-  function closeSheet() {
-    document.getElementById('phone1').classList.remove('open');
+  function closeCred(el) {
+    const ph = el.closest('.phone');
+    if (ph.id !== 'phone1') { toast(ph, '展示态：请在页面1中操作'); return; }
+    if (state.popup) {
+      track('popup_close', { rec_id: state.popup.rid, duration_ms: Date.now() - state.popup.t });
+      state.popup = null;
+    }
+    hideAll(ph);
   }
-  document.getElementById('sheetStatic').innerHTML = sheetHTML('A', true);
+  function viewAll(el, rid) {
+    toast(el.closest('.phone'), `共 ${recById(rid).notes.length} 篇引用笔记（完整列表页待开发）`);
+  }
 
-  /* ---------------- 页面3 渲染 ---------------- */
-  const dims = [
-    { n: '不闷痘', v: 60, gap: false },
-    { n: '不假滑', v: 30, gap: true },
-    { n: '性价比', v: 40, gap: false },
-    { n: '温和度', v: 20, gap: true },
-    { n: '控油力', v: 60, gap: false }
-  ];
-  const demand = [85, 78, 65, 82, 70]; // 用户需求热度（对照）
+  /* ================= 笔记详情 ================= */
+  function noteHTML(id) {
+    const n = notes[id];
+    const cmts = praise.slice(0, 2).map((t, i) => ({ u: ['小鹿不迷路', '一颗橙子'][i], t, neg: false }))
+      .concat((n.complaints || []).map((t, i) => ({ u: ['芝士莓莓', '早睡选手', '路过的猫', '阿Q', '南风'][i % 5], t, neg: true })));
+    const negN = (n.complaints || []).length;
+    return `${statusbar()}
+      <div class="navbar note-nav">
+        <span class="back" onclick="closeLayer(this)">‹</span>
+        <div class="nm">${avatar(n.a)}${n.a}</div>
+        <button class="follow">关注</button>
+      </div>
+      <div class="note-scroll">
+        <div class="note-big" style="background:${n.bg}">${n.e}${n.coop ? '<span class="coop-banner">🏷️ 品牌合作笔记</span>' : ''}</div>
+        <div class="note-content">
+          <div class="n-title">${n.t}</div>
+          <div class="n-body">${n.body}</div>
+          <div class="n-meta">${metaTagsHTML(n, false)}</div>
+        </div>
+        <div class="n-cmt-h">共 ${cmts.length} 条评论${negN ? ` · 其中 ${negN} 条吐槽` : ''}</div>
+        ${cmts.map(c => `<div class="n-cmt">${avatar(c.u)}<div><div class="u">${c.u}${c.neg ? '<span class="neg-tag">吐槽</span>' : ''}</div><div class="c">${c.t}</div></div></div>`).join('')}
+        <div style="height:40px"></div>
+      </div>`;
+  }
+  function openNote(el, id) {
+    const ph = el.closest('.phone');
+    const L = ph.querySelector('.layer-note');
+    L.innerHTML = noteHTML(id);
+    L.classList.add('show');
+    const r = recs.find(x => x.notes.includes(id));
+    track('click_source_card', { rec_id: r.id, note_id: id, is_coop: notes[id].coop });
+  }
+  function closeLayer(el) { el.closest('.layer').classList.remove('show'); }
 
-  (function drawRadar() {
-    const cx = 150, cy = 122, R = 88, N = dims.length;
-    const pt = (i, r) => {
-      const a = -Math.PI / 2 + i * 2 * Math.PI / N;
-      return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  /* ================= 反馈闭环 ================= */
+  function rerenderFb(id) {
+    const row = document.querySelector(`#recList .rec[data-id="${id}"] .fb-row`);
+    if (row) row.innerHTML = fbRowHTML(id);
+  }
+  function fbUp(id) {
+    const ph = phone1();
+    if (state.netError) { state.fbError[id] = true; rerenderFb(id); track('click_feedback', { rec_id: id, result: 'useful', status: 'failed' }); return; }
+    state.fbError[id] = false;
+    state.feedback[id] = { v: 'up' };
+    state.downStreak = 0;
+    rerenderFb(id);
+    toast(ph, '感谢反馈');
+    track('click_feedback', { rec_id: id, result: 'useful' });
+  }
+  function fbDown(id) {
+    const ph = phone1();
+    if (state.netError) { state.fbError[id] = true; rerenderFb(id); track('click_feedback', { rec_id: id, result: 'useless', status: 'failed' }); return; }
+    state.fbError[id] = false;
+    state.fbTarget = id;
+    track('click_feedback', { rec_id: id, result: 'useless' });
+    ph.querySelector('.sheet-fb').innerHTML = `
+      <div class="sheet-head">
+        <div class="sheet-grip"></div>
+        <div class="sheet-title">这条推荐哪里没用？</div>
+        <div class="sheet-sub">${recById(id).name}</div>
+        <button class="sheet-close" onclick="hideAll(this.closest('.phone'))">✕</button>
+      </div>
+      <div class="fb-sheet-body">
+        ${['信息过时了', '不适合我', '感觉是广告', '其他原因'].map(r => `<button class="reason" onclick="pickReason('${r}')">${r}<span>›</span></button>`).join('')}
+      </div>
+      <div class="sheet-foot" style="border:none;padding-top:4px">
+        <button class="pref-entry" onclick="openPrefs(this)">🎯<div>设置你的偏好<small>告诉点点你的肤质、预算、场景</small></div><b>›</b></button>
+      </div>`;
+    showSheet(ph, '.sheet-fb');
+  }
+  function pickReason(reason) {
+    const ph = phone1(), id = state.fbTarget;
+    state.feedback[id] = { v: 'down', reason };
+    state.downStreak++;
+    track('select_feedback_reason', { rec_id: id, reason });
+    hideAll(ph);
+    rerenderFb(id);
+    toast(ph, '感谢反馈，我们会优化推荐');
+    if (state.downStreak >= 2) {
+      state.downStreak = 0;
+      setTimeout(() => { ph.classList.add('open-mask'); $('#streakDialog').classList.add('show'); }, 1500);
+    }
+  }
+
+  /* ================= 偏好设置 ================= */
+  function prefsPageHTML(isLayer) {
+    const p = state.prefs || { skin: null, budget: null, scenes: [], acceptCoop: true };
+    const chip = (g, v, label, on, multi) =>
+      `<button class="pchip ${on ? 'on' : ''}" data-g="${g}" data-v="${v}" onclick="pickChip(this, ${multi ? 1 : 0})">${label}</button>`;
+    return `${isLayer ? statusbar() : ''}
+      <div class="navbar">
+        <span class="back" onclick="${isLayer ? 'closeLayer(this)' : ''}">‹</span>
+        <div class="title center">偏好设置</div><span class="more"></span>
+      </div>
+      <div class="scroll">
+        <div class="pref-intro">告诉点点你的情况，推荐会更贴合你</div>
+        <div class="pref-sec"><div class="pref-h">肤质</div><div class="pchips">${['油皮', '干皮', '混合皮', '敏感皮'].map(s => chip('skin', s, s, p.skin === s)).join('')}</div></div>
+        <div class="pref-sec"><div class="pref-h">预算范围</div><div class="pchips">${[50, 100, 200, 0].map(b => chip('budget', b, budgetLabel(b), p.budget === b)).join('')}</div></div>
+        <div class="pref-sec"><div class="pref-h">使用场景<span>可多选</span></div><div class="pchips">${SCENES.map(s => chip('scenes', s, s, p.scenes.includes(s), true)).join('')}</div></div>
+        <div class="pref-sec"><div class="pref-h">是否接受品牌合作内容</div><div class="pchips">${chip('coop', 1, '接受（会标注出来）', p.acceptCoop)}${chip('coop', 0, '不接受，帮我隐藏', !p.acceptCoop)}</div></div>
+        <div class="pref-store">${state.loggedIn ? '☁️ 已登录：偏好会同步到云端，换设备也能用' : '📱 未登录：偏好只保存在本机，换设备后不保留'}</div>
+      </div>
+      <div class="pref-foot"><button class="btn-primary" onclick="savePrefs(this)">保存偏好</button></div>`;
+  }
+  function pickChip(el, multi) {
+    if (multi) { el.classList.toggle('on'); return; }
+    el.parentElement.querySelectorAll('.pchip').forEach(c => c.classList.remove('on'));
+    el.classList.add('on');
+  }
+  function openPrefs(el) {
+    const ph = el.closest('.phone');
+    if (el.closest('.sheet-fb') || el.closest('.dialog')) hideAll(ph);
+    const L = ph.querySelector('.layer-prefs');
+    L.innerHTML = prefsPageHTML(true);
+    L.classList.add('show');
+  }
+  function savePrefs(el) {
+    const root = el.closest('.prefs-root'), ph = el.closest('.phone');
+    const pick = g => root.querySelector(`.pchip.on[data-g="${g}"]`);
+    if (!pick('skin') || !pick('budget')) { toast(ph, '请先选择肤质和预算'); return; }
+    state.prefs = {
+      skin: pick('skin').dataset.v,
+      budget: Number(pick('budget').dataset.v),
+      scenes: [...root.querySelectorAll('.pchip.on[data-g="scenes"]')].map(c => c.dataset.v),
+      acceptCoop: pick('coop') ? pick('coop').dataset.v === '1' : true
     };
+    storePrefs();
+    track('save_preference', { skin: state.prefs.skin, budget: state.prefs.budget, scenes: state.prefs.scenes, accept_coop: state.prefs.acceptCoop, sync: state.loggedIn ? 'cloud' : 'local' });
+    const layer = el.closest('.layer');
+    if (layer) layer.classList.remove('show');
+    renderAll();
+    toast(ph, '偏好已保存，推荐会更贴合你');
+  }
+
+  /* ================= 弹层控制 ================= */
+  function showSheet(ph, sel) {
+    ph.classList.add('open-mask');
+    ph.querySelector(sel).classList.add('show');
+  }
+  function hideAll(ph) {
+    ph.querySelectorAll('.sheet:not(.static), .dialog').forEach(s => s.classList.remove('show'));
+    ph.classList.remove('open-mask');
+  }
+  function onMask(mask) {
+    const ph = mask.closest('.phone');
+    if (ph.querySelector('.sheet-cred.show')) closeCred(mask); else hideAll(ph);
+  }
+
+  /* ================= 控制台 ================= */
+  function setDark(on) { document.body.classList.toggle('dark', on); }
+  function clearPrefs() { state.prefs = null; storePrefs(); renderAll(); toast(phone1(), '已清空偏好'); }
+  function resetPrefs() { state.prefs = { ...DEFAULT_PREFS, scenes: [...DEFAULT_PREFS.scenes] }; storePrefs(); renderAll(); toast(phone1(), '已恢复默认偏好'); }
+  function resetFeedback() { state.feedback = {}; state.fbError = {}; state.downStreak = 0; renderList(); toast(phone1(), '反馈记录已重置'); }
+
+  function renderAll() {
+    renderPrefBar();
+    renderList();
+    $('#sheetStatic').innerHTML = sheetHTML('A');
+    $('#prefsStatic').innerHTML = prefsPageHTML(false);
+    if (state.popup) phone1().querySelector('.sheet-cred').innerHTML = sheetHTML(state.popup.rid);
+  }
+
+  /* ================= 内部：品牌诊断（隐藏入口） ================= */
+  function showInternal() {
+    const f = $('#frameInternal');
+    f.classList.add('visible');
+    f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function hideInternal() {
+    $('#frameInternal').classList.remove('visible');
+    if (location.hash === '#internal') history.replaceState(null, '', location.pathname);
+  }
+  $('#ddTitle').addEventListener('click', e => { if (e.detail === 3) showInternal(); });
+
+  function drawBrand() {
+    const dims = [
+      { n: '不闷痘', v: 60, gap: false }, { n: '不假滑', v: 30, gap: true }, { n: '性价比', v: 40, gap: false },
+      { n: '温和度', v: 20, gap: true }, { n: '控油力', v: 60, gap: false }
+    ];
+    const demand = [85, 78, 65, 82, 70];
+    const cx = 150, cy = 122, R = 88, N = dims.length;
+    const pt = (i, r) => { const a = -Math.PI / 2 + i * 2 * Math.PI / N; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
     let s = '';
-    [0.25, 0.5, 0.75, 1].forEach(k => {
-      s += `<polygon points="${dims.map((_, i) => pt(i, R * k).join(',')).join(' ')}" fill="${k === 1 ? '#fafafa' : 'none'}" stroke="#e8e8e8"/>`;
-    });
-    dims.forEach((_, i) => { const [x, y] = pt(i, R); s += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e8e8e8"/>`; });
+    [0.25, 0.5, 0.75, 1].forEach(k => { s += `<polygon points="${dims.map((_, i) => pt(i, R * k).join(',')).join(' ')}" style="fill:none;stroke:var(--line)"/>`; });
+    dims.forEach((_, i) => { const [x, y] = pt(i, R); s += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" style="stroke:var(--line)"/>`; });
     s += `<polygon points="${demand.map((v, i) => pt(i, R * v / 100).join(',')).join(' ')}" fill="none" stroke="#b5b5b5" stroke-dasharray="4 3" stroke-width="1.2"/>`;
     s += `<polygon points="${dims.map((d, i) => pt(i, R * d.v / 100).join(',')).join(' ')}" fill="rgba(255,36,66,.18)" stroke="#ff2442" stroke-width="2"/>`;
     dims.forEach((d, i) => {
       const [x, y] = pt(i, R * d.v / 100);
       s += `<circle cx="${x}" cy="${y}" r="3.5" fill="${d.gap ? '#e8590c' : '#ff2442'}" stroke="#fff" stroke-width="1.5"/>`;
       const [lx, ly] = pt(i, R + 18);
-      s += `<text x="${lx}" y="${ly + 4}" text-anchor="middle" font-size="12" fill="${d.gap ? '#e8590c' : '#333'}" font-weight="${d.gap ? 600 : 400}">${d.n}${d.gap ? ' ⚠' : ''}</text>`;
+      s += `<text x="${lx}" y="${ly + 4}" text-anchor="middle" font-size="12" style="fill:${d.gap ? '#e8590c' : 'var(--text)'}" font-weight="${d.gap ? 600 : 400}">${d.n}${d.gap ? ' ⚠' : ''}</text>`;
     });
     s += `<g font-size="10.5" fill="#888"><rect x="70" y="234" width="10" height="3" fill="#ff2442"/><text x="84" y="239">品牌内容覆盖</text>
           <line x1="164" y1="235.5" x2="176" y2="235.5" stroke="#b5b5b5" stroke-dasharray="3 2"/><text x="180" y="239">用户需求热度</text></g>`;
-    document.getElementById('radar').innerHTML = s;
-  })();
-
-  document.getElementById('dimList').innerHTML = dims.map(d => `
-    <div class="dim">
-      <span class="n">${d.n}</span>
-      <div class="bar"><i style="width:${d.v}%;background:${d.gap ? 'var(--orange)' : 'var(--red)'}"></i></div>
-      <span class="pct">${d.v}%</span>
-      <span class="st ${d.gap ? 'gap' : 'cover'}">${d.gap ? '缺口' : '有覆盖'}</span>
-    </div>`).join('');
-
-  function toast(id, msg) {
-    const t = document.getElementById(id);
-    t.textContent = msg; t.classList.add('show');
-    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1500);
+    $('#radar').innerHTML = s;
+    $('#dimList').innerHTML = dims.map(d => `
+      <div class="dim"><span class="n">${d.n}</span>
+        <div class="bar"><i style="width:${d.v}%;background:${d.gap ? '#e8590c' : 'var(--red)'}"></i></div>
+        <span class="pct">${d.v}%</span><span class="st ${d.gap ? 'gap' : 'cover'}">${d.gap ? '缺口' : '有覆盖'}</span></div>`).join('');
   }
+
+  /* ================= 初始化 ================= */
+  // 每台手机注入二级页面容器与 toast
+  ['#phone1', '#phone2', '#phone3'].forEach(sel => {
+    $(sel).insertAdjacentHTML('beforeend',
+      '<div class="layer layer-note"></div><div class="layer layer-prefs prefs-root"></div><div class="toast"></div>');
+  });
+  $('#phone4').insertAdjacentHTML('beforeend', '<div class="toast"></div>');
+
+  // 反馈入口：卡片滑入可视区后才出现
+  observer = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('seen'); observer.unobserve(en.target); } });
+  }, { root: $('#scroll1'), threshold: 0.6 });
+
+  renderAll();
+  renderLogs();
+  drawBrand();
+  if (location.hash === '#internal') showInternal();
 </script>
 </body>
 </html>
