@@ -71,32 +71,7 @@
     -webkit-font-smoothing: antialiased;
     transition: background .2s;
   }
-  .canvas { display: flex; gap: 40px; justify-content: center; align-items: flex-start; flex-wrap: wrap; padding: 40px 24px 60px; }
-  .frame-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-  .frame-label { font-size: 14px; color: #555; font-weight: 600; }
-  body.dark .frame-label { color: #ccc; }
-  .frame-label span { color: #9a9a9a; font-weight: 400; margin-left: 6px; }
-
-  /* ---------- 演示控制台 ---------- */
-  .console {
-    width: 270px; background: #fff; color: #222; border-radius: 16px; padding: 16px; font-size: 13px;
-    box-shadow: 0 6px 24px rgba(0,0,0,.08); position: sticky; top: 20px; margin-top: 34px;
-  }
-  .c-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
-  .c-title span { font-size: 11px; color: #999; font-weight: 400; margin-left: 4px; }
-  .sw { display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; }
-  .sw input { accent-color: #ff2442; width: 15px; height: 15px; }
-  .c-btns { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
-  .c-btns button, .c-sub button { border: 1px solid #e3e3e3; background: #fafafa; border-radius: 8px; padding: 5px 9px; font-size: 12px; cursor: pointer; color: #333; }
-  .c-btns button:hover { border-color: #ff2442; color: #ff2442; }
-  .c-sub { display: flex; justify-content: space-between; align-items: center; font-weight: 600; border-top: 1px solid #eee; padding-top: 12px; }
-  .c-sub button { padding: 2px 8px; font-weight: 400; }
-  .logs { margin-top: 8px; max-height: 330px; overflow-y: auto; font-family: Consolas, Menlo, monospace; font-size: 11px; line-height: 1.5; }
-  .logs .lg { padding: 5px 0; border-bottom: 1px dashed #eee; word-break: break-all; }
-  .logs .lg b { color: #ff2442; font-weight: 600; }
-  .logs .lg i { color: #999; font-style: normal; margin-right: 4px; }
-  .logs .empty-log { color: #aaa; padding: 8px 0; }
-  .c-hint { font-size: 11px; color: #aaa; margin-top: 10px; line-height: 1.5; }
+  .canvas { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 30px 16px; }
 
   /* ---------- 手机框 ---------- */
   .phone {
@@ -321,9 +296,8 @@
   .toast.show { opacity: 1; }
 
   /* ---------- 内部：品牌内容诊断 ---------- */
-  #frameInternal { display: none; }
-  #frameInternal.visible { display: flex; }
   .internal-badge { position: absolute; top: 50px; right: 16px; font-size: 10.5px; color: #fff; background: #555; border-radius: 4px; padding: 1px 6px; z-index: 3; }
+  .layer-internal { z-index: 30; }
   .brand-head { display: flex; align-items: center; gap: 10px; background: var(--card); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; }
   .brand-logo { width: 38px; height: 38px; border-radius: 10px; background: #1f2937; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; }
   .brand-head .nm { font-size: 15px; font-weight: 600; }
@@ -352,32 +326,18 @@
   .advice { background: linear-gradient(135deg, #ff2442, #ff5a6e); color: #fff; border-radius: 16px; padding: 14px; margin-bottom: 10px; }
   .advice .h { font-size: 12px; opacity: .9; }
   .advice .t { font-size: 15px; font-weight: 600; line-height: 1.5; margin-top: 6px; }
+
+  /* 在真手机上打开时：去掉机身外框，铺满屏幕 */
+  @media (max-width: 500px) {
+    .canvas { padding: 0; min-height: 0; display: block; }
+    .phone { width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; box-shadow: none; }
+    .phone .statusbar { display: none; }
+  }
 </style>
 </head>
 <body>
 
 <div class="canvas">
-
-  <!-- ================= 演示控制台（非产品界面） ================= -->
-  <div class="console">
-    <div class="c-title">演示控制台<span>不属于产品界面</span></div>
-    <label class="sw"><input type="checkbox" onchange="setDark(this.checked)">暗色模式</label>
-    <label class="sw"><input type="checkbox" id="swLogin" onchange="state.loggedIn = this.checked; renderAll()">已登录（偏好同步到云端）</label>
-    <label class="sw"><input type="checkbox" onchange="state.netError = this.checked">模拟网络异常（反馈失败）</label>
-    <label class="sw"><input type="checkbox" onchange="state.emptyFilter = this.checked; renderList()">模拟筛选后无结果</label>
-    <div class="c-btns">
-      <button onclick="clearPrefs()">清空偏好</button>
-      <button onclick="resetPrefs()">恢复默认偏好</button>
-      <button onclick="resetFeedback()">重置反馈</button>
-    </div>
-    <div class="c-sub">埋点日志 <button onclick="logs.length = 0; renderLogs()">清空</button></div>
-    <div class="logs" id="logs"></div>
-    <div class="c-hint">内部入口：连点 3 次页面1顶部的「点点」，或在网址后加 #internal，可以打开品牌内容诊断页。</div>
-  </div>
-
-  <!-- ================= 页面1：搜索界面（主流程） ================= -->
-  <div class="frame-wrap">
-    <div class="frame-label">页面1 · 搜索界面<span>可点标签 / 反馈 / 筛选</span></div>
     <div class="phone" id="phone1">
       <div class="statusbar"><span>20:29</span><span class="icons">5G ▂▄▆ <span class="battery">73</span></span></div>
       <div class="navbar">
@@ -445,68 +405,41 @@
           <button class="btn-primary" onclick="openPrefs(this)">去设置偏好</button>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- ================= 页面2：可信度解释弹窗（展示态） ================= -->
-  <div class="frame-wrap">
-    <div class="frame-label">页面2 · 可信度解释弹窗<span>展示态（第 1 条推荐）</span></div>
-    <div class="phone" id="phone2">
-      <div class="statusbar"><span>20:29</span><span class="icons">5G ▂▄▆ <span class="battery">73</span></span></div>
-      <div class="sheet static" id="sheetStatic"></div>
-      <div class="home-indicator"></div>
-    </div>
-  </div>
-
-  <!-- ================= 页面3：偏好设置（展示态） ================= -->
-  <div class="frame-wrap">
-    <div class="frame-label">页面3 · 偏好设置<span>从反馈弹窗 / 偏好条进入</span></div>
-    <div class="phone" id="phone3">
-      <div class="statusbar"><span>20:29</span><span class="icons">5G ▂▄▆ <span class="battery">73</span></span></div>
-      <div class="prefs-static prefs-root" id="prefsStatic"></div>
-      <div class="home-indicator"></div>
-    </div>
-  </div>
-
-  <!-- ================= 内部：品牌内容诊断（隐藏入口） ================= -->
-  <div class="frame-wrap" id="frameInternal">
-    <div class="frame-label">内部测试 · 品牌内容诊断<span>不对普通用户开放</span></div>
-    <div class="phone" id="phone4">
-      <div class="statusbar"><span>20:29</span><span class="icons">5G ▂▄▆ <span class="battery">73</span></span></div>
-      <div class="internal-badge">INTERNAL</div>
-      <div class="navbar">
-        <span class="back" onclick="hideInternal()">‹</span>
-        <div class="title center">品牌内容诊断</div>
-        <span class="more">···</span>
-      </div>
-      <div class="scroll">
-        <div class="brand-head">
-          <div class="brand-logo">安</div>
-          <div><div class="nm">安澜 ANLAN</div><div class="sub">护肤 · 已认证品牌号</div></div>
-          <div class="chip">近 30 天 ▾</div>
+      <!-- 内部：品牌内容诊断（隐藏入口：连点 3 次「点点」或网址加 #internal） -->
+      <div class="layer layer-internal" id="layerInternal">
+        <div class="statusbar"><span>20:29</span><span class="icons">5G ▂▄▆ <span class="battery">73</span></span></div>
+        <div class="internal-badge">INTERNAL</div>
+        <div class="navbar">
+          <span class="back" onclick="hideInternal()">‹</span>
+          <div class="title center">品牌内容诊断</div>
+          <span class="more">···</span>
         </div>
-        <div class="panel">
-          <div class="panel-title">搜索词覆盖率 <span>AI 回答抽样 10 次</span></div>
-          <div class="cov-row">
-            <div class="cov-big">2<small>/10</small></div>
-            <div class="cov-txt">在「<b>油敏肌水乳</b>」下<br>你的品牌被 AI 提及 <b>2/10</b> 次</div>
+        <div class="scroll">
+          <div class="brand-head">
+            <div class="brand-logo">安</div>
+            <div><div class="nm">安澜 ANLAN</div><div class="sub">护肤 · 已认证品牌号</div></div>
+            <div class="chip">近 30 天 ▾</div>
           </div>
-          <div class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="panel">
+            <div class="panel-title">搜索词覆盖率 <span>AI 回答抽样 10 次</span></div>
+            <div class="cov-row">
+              <div class="cov-big">2<small>/10</small></div>
+              <div class="cov-txt">在「<b>油敏肌水乳</b>」下<br>你的品牌被 AI 提及 <b>2/10</b> 次</div>
+            </div>
+            <div class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title">需求维度覆盖 <span>基于 286 篇用户笔记</span></div>
+            <div class="radar-wrap"><svg id="radar" width="300" height="244" viewBox="0 0 300 244"></svg></div>
+            <div id="dimList"></div>
+          </div>
+          <div class="advice">
+            <div class="h">💡 优化建议</div>
+            <div class="t">建议补充「不假滑」和「温和度」维度的真实体验内容</div>
+          </div>
         </div>
-        <div class="panel">
-          <div class="panel-title">需求维度覆盖 <span>基于 286 篇用户笔记</span></div>
-          <div class="radar-wrap"><svg id="radar" width="300" height="244" viewBox="0 0 300 244"></svg></div>
-          <div id="dimList"></div>
         </div>
-        <div class="advice">
-          <div class="h">💡 优化建议</div>
-          <div class="t">建议补充「不假滑」和「温和度」维度的真实体验内容</div>
-        </div>
-      </div>
-      <div class="home-indicator"></div>
     </div>
-  </div>
-
 </div>
 
 <script>
@@ -569,10 +502,9 @@
 
   /* ================= 状态 ================= */
   const state = {
-    prefs: loadPrefs(), loggedIn: false, netError: false, emptyFilter: false, filterOn: false,
+    prefs: loadPrefs(), loggedIn: false, filterOn: false,
     feedback: {}, fbError: {}, fbTarget: null, downStreak: 0, popup: null
   };
-  const logs = [];
 
   function loadPrefs() {
     try { const s = localStorage.getItem('dd_prefs'); if (s) return JSON.parse(s); } catch (e) {}
@@ -598,16 +530,11 @@
     clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1600);
   }
 
+  // 埋点：原型阶段输出到浏览器控制台，可用 window.__trackLogs 查看全部
+  const logs = window.__trackLogs = [];
   function track(event, fields) {
-    const time = new Date().toTimeString().slice(0, 8);
-    logs.unshift({ time, event, fields });
+    logs.push({ time: new Date().toTimeString().slice(0, 8), event, fields });
     console.log('[track]', event, fields);
-    renderLogs();
-  }
-  function renderLogs() {
-    $('#logs').innerHTML = logs.length
-      ? logs.slice(0, 40).map(l => `<div class="lg"><i>${l.time}</i><b>${l.event}</b><br>${JSON.stringify(l.fields)}</div>`).join('')
-      : '<div class="empty-log">还没有事件，去页面1点一点试试</div>';
   }
 
   /* ================= 文案规则 ================= */
@@ -653,10 +580,7 @@
     if (state.prefs && !state.prefs.acceptCoop) {
       const n = list.length; list = list.filter(r => !r.meta.coop); hiddenByPref = n - list.length;
     }
-    if (state.filterOn) {
-      list = list.filter(r => !r.meta.coop);
-      if (state.emptyFilter) list = [];
-    }
+    if (state.filterOn) list = list.filter(r => !r.meta.coop);
     return { list, hiddenByPref };
   }
 
@@ -811,7 +735,6 @@
   }
   function closeCred(el) {
     const ph = el.closest('.phone');
-    if (ph.id !== 'phone1') { toast(ph, '展示态：请在页面1中操作'); return; }
     if (state.popup) {
       track('popup_close', { rec_id: state.popup.rid, duration_ms: Date.now() - state.popup.t });
       state.popup = null;
@@ -863,7 +786,7 @@
   }
   function fbUp(id) {
     const ph = phone1();
-    if (state.netError) { state.fbError[id] = true; rerenderFb(id); track('click_feedback', { rec_id: id, result: 'useful', status: 'failed' }); return; }
+    if (!navigator.onLine) { state.fbError[id] = true; rerenderFb(id); track('click_feedback', { rec_id: id, result: 'useful', status: 'failed' }); return; }
     state.fbError[id] = false;
     state.feedback[id] = { v: 'up' };
     state.downStreak = 0;
@@ -873,7 +796,7 @@
   }
   function fbDown(id) {
     const ph = phone1();
-    if (state.netError) { state.fbError[id] = true; rerenderFb(id); track('click_feedback', { rec_id: id, result: 'useless', status: 'failed' }); return; }
+    if (!navigator.onLine) { state.fbError[id] = true; rerenderFb(id); track('click_feedback', { rec_id: id, result: 'useless', status: 'failed' }); return; }
     state.fbError[id] = false;
     state.fbTarget = id;
     track('click_feedback', { rec_id: id, result: 'useless' });
@@ -970,28 +893,21 @@
     if (ph.querySelector('.sheet-cred.show')) closeCred(mask); else hideAll(ph);
   }
 
-  /* ================= 控制台 ================= */
-  function setDark(on) { document.body.classList.toggle('dark', on); }
-  function clearPrefs() { state.prefs = null; storePrefs(); renderAll(); toast(phone1(), '已清空偏好'); }
-  function resetPrefs() { state.prefs = { ...DEFAULT_PREFS, scenes: [...DEFAULT_PREFS.scenes] }; storePrefs(); renderAll(); toast(phone1(), '已恢复默认偏好'); }
-  function resetFeedback() { state.feedback = {}; state.fbError = {}; state.downStreak = 0; renderList(); toast(phone1(), '反馈记录已重置'); }
+  /* ================= 暗色模式：跟随系统 ================= */
+  const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
+  const applyTheme = () => document.body.classList.toggle('dark', darkMQ.matches);
+  darkMQ.addEventListener('change', applyTheme);
 
   function renderAll() {
     renderPrefBar();
     renderList();
-    $('#sheetStatic').innerHTML = sheetHTML('A');
-    $('#prefsStatic').innerHTML = prefsPageHTML(false);
     if (state.popup) phone1().querySelector('.sheet-cred').innerHTML = sheetHTML(state.popup.rid);
   }
 
   /* ================= 内部：品牌诊断（隐藏入口） ================= */
-  function showInternal() {
-    const f = $('#frameInternal');
-    f.classList.add('visible');
-    f.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  function showInternal() { $('#layerInternal').classList.add('show'); }
   function hideInternal() {
-    $('#frameInternal').classList.remove('visible');
+    $('#layerInternal').classList.remove('show');
     if (location.hash === '#internal') history.replaceState(null, '', location.pathname);
   }
   $('#ddTitle').addEventListener('click', e => { if (e.detail === 3) showInternal(); });
@@ -1025,20 +941,17 @@
   }
 
   /* ================= 初始化 ================= */
-  // 每台手机注入二级页面容器与 toast
-  ['#phone1', '#phone2', '#phone3'].forEach(sel => {
-    $(sel).insertAdjacentHTML('beforeend',
-      '<div class="layer layer-note"></div><div class="layer layer-prefs prefs-root"></div><div class="toast"></div>');
-  });
-  $('#phone4').insertAdjacentHTML('beforeend', '<div class="toast"></div>');
+  // 注入二级页面容器与 toast
+  phone1().insertAdjacentHTML('beforeend',
+    '<div class="layer layer-note"></div><div class="layer layer-prefs prefs-root"></div><div class="toast"></div>');
 
   // 反馈入口：卡片滑入可视区后才出现
   observer = new IntersectionObserver(entries => {
     entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('seen'); observer.unobserve(en.target); } });
   }, { root: $('#scroll1'), threshold: 0.6 });
 
+  applyTheme();
   renderAll();
-  renderLogs();
   drawBrand();
   if (location.hash === '#internal') showInternal();
 </script>
