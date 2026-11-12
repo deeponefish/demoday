@@ -295,6 +295,66 @@
   .toast { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); background: rgba(0,0,0,.78); color: #fff; font-size: 13px; padding: 9px 16px; border-radius: 8px; z-index: 50; opacity: 0; pointer-events: none; transition: opacity .2s; white-space: nowrap; }
   .toast.show { opacity: 1; }
 
+  /* ---------- v2.2：验证用户 / 吐槽核验 / 数据锚点 / 时效 / 弹窗反馈 ---------- */
+  .dialog { z-index: 14; }
+  .mask2 { position: absolute; inset: 0; background: rgba(0,0,0,.3); z-index: 12; opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .phone.open-mask2 .mask2 { opacity: 1; pointer-events: auto; }
+  .sheet-users { z-index: 13; max-height: 80%; }
+  .layer-fresh { z-index: 25; }
+
+  .trust-inline.clickable { border: none; cursor: pointer; font-family: inherit; padding: 2px 8px; font-size: 11.5px; box-shadow: inset 0 0 0 1px currentColor; }
+  .trust-inline.clickable b { font-weight: 700; margin-left: 1px; }
+
+  .checks li { align-items: flex-start; }
+  .checks .ck { margin-top: 1px; }
+  .ck-main { flex: 1; min-width: 0; line-height: 1.45; }
+  .anchor { font-size: 11.5px; color: var(--text-3); margin-top: 3px; line-height: 1.5; }
+  .anchor-link { padding: 4px 0 0; font-size: 12px; }
+
+  .mt.time { cursor: pointer; }
+  .mt.bad u { text-decoration: underline dotted; text-underline-offset: 2px; }
+  .cp { padding: 5px 0; border-bottom: 1px dashed var(--red-line); }
+  .cp:last-child { border-bottom: none; padding-bottom: 0; }
+  .cp-t { font-size: 12.5px; color: var(--text); line-height: 1.55; }
+  .cp-v { font-size: 10.5px; margin-top: 2px; }
+  .cp-v.ok { color: var(--green); }
+  .cp-v.no { color: var(--text-3); }
+  .n-cmt .cp-v { margin-top: 0; }
+
+  .score-anchor { display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--text-3); margin-bottom: 2px; }
+  .mini-bar { display: inline-block; width: 46px; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+  .mini-bar b { display: block; height: 100%; background: var(--text-3); }
+
+  .cred-fb .foot-btns { align-items: center; }
+  .btn-ghost.cf { flex: 0 0 auto; padding: 0 13px; font-size: 13.5px; color: var(--text-2); }
+  .btn-ghost.cf:hover, .btn-ghost.cf.on { border-color: var(--red); color: var(--red); }
+  .cf-done { flex: 1; font-size: 13px; color: var(--text-3); }
+  .cf-reasons { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 12.5px; color: var(--text-2); }
+  .cf-reasons .pchip { padding: 4px 11px; font-size: 12.5px; }
+  .cf-err { font-size: 12px; color: var(--low); margin-bottom: 8px; }
+
+  .u-sum { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 10px; }
+  .u-sum span { font-size: 12px; color: var(--green); background: var(--green-bg); border-radius: 6px; padding: 3px 8px; font-weight: 600; }
+  .u-card { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .u-av { width: 34px; height: 34px; border-radius: 50%; background: var(--chip); color: var(--text-3); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .u-main { flex: 1; min-width: 0; }
+  .u-name { font-size: 13.5px; font-weight: 600; }
+  .u-name span { font-size: 11.5px; color: var(--text-3); font-weight: 400; margin-left: 6px; }
+  .u-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .ut { font-size: 11px; color: var(--text-2); background: var(--chip); border-radius: 5px; padding: 1px 6px; }
+  .ut.ok { color: var(--green); background: var(--green-bg); }
+  .u-say { font-size: 12.5px; color: var(--text-2); margin-top: 5px; line-height: 1.5; }
+  .u-go { flex-shrink: 0; padding-top: 2px; }
+  .u-more { font-size: 11.5px; color: var(--text-3); text-align: center; margin: 6px 0 4px; }
+
+  .fr-head { display: flex; align-items: center; gap: 10px; background: var(--card); border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+  .fr-head .nm { font-size: 15px; font-weight: 600; }
+  .fr-head .sub { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+  .fr-sum { border-radius: 12px; padding: 11px 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 10px; }
+  .fr-sum.ok { color: var(--green); background: var(--green-bg); }
+  .fr-sum.warn { color: var(--stale); background: var(--stale-bg); }
+  .fr-list { background: var(--card); }
+
   /* ---------- 内部：品牌内容诊断 ---------- */
   .internal-badge { position: absolute; top: 50px; right: 16px; font-size: 10.5px; color: #fff; background: #555; border-radius: 4px; padding: 1px 6px; z-index: 3; }
   .layer-internal { z-index: 30; }
@@ -396,6 +456,8 @@
       <div class="mask" onclick="onMask(this)"></div>
       <div class="sheet sheet-cred"></div>
       <div class="sheet sheet-fb"></div>
+      <div class="mask2" onclick="closeUsers()"></div>
+      <div class="sheet sheet-users"></div>
       <div class="dialog" id="streakDialog">
         <div class="d-ic">🎯</div>
         <div class="d-t">你更想要哪种推荐？</div>
@@ -450,18 +512,18 @@
   const notes = {
     a1: { t: '油敏肌空瓶记录｜连用21天闭口变少了', a: '橘子汽水', likes: '2.3k', days: 21, coop: false, complaints: [], e: '🫒', bg: 'linear-gradient(135deg,#e8f5df,#c2e3a8)',
           body: '混油敏感肌，夏天最怕闷。这瓶用了三周，质地是清爽的啫喱乳，上脸很快吸收，T 区下午也不会油到反光。下巴的闭口少了一大半，没有刺痛泛红。自费买的，不是广告～' },
-    a2: { t: '夏天也不闷！混油T区真实反馈', a: 'Momo不熬夜', likes: '856', days: 14, coop: false, complaints: ['T区下午还是会出点油，要备吸油纸'], e: '🧴', bg: 'linear-gradient(135deg,#fdf0e1,#f7d1a8)',
+    a2: { t: '夏天也不闷！混油T区真实反馈', a: 'Momo不熬夜', likes: '856', days: 14, coop: false, complaints: [['味道有点冲，上脸前几秒有酒精感', 1]], e: '🧴', bg: 'linear-gradient(135deg,#fdf0e1,#f7d1a8)',
           body: '通勤党，早上水乳+防晒就出门。两周下来最大的感受是不闷，上妆也不搓泥。唯一的小缺点是 T 区到下午还是会有点油光。' },
     a3: { t: '敏感期用了两周的碎碎念', a: '阿梨', likes: '412', days: 30, coop: false, complaints: [], e: '🌿', bg: 'linear-gradient(135deg,#e2f1f7,#b4d9ea)',
           body: '换季泛红期间试的，原本担心刺激，结果一点都没有。保湿力中等，干皮可能要再叠面霜。' },
-    b1: { t: '油皮通勤防晒天花板？真的不搓泥', a: '美妆研究所', likes: '5.1k', days: 38, coop: true, complaints: ['用到第二周开始搓泥了', '下午T区还是会反光', '叠粉底有点假白'], e: '☀️', bg: 'linear-gradient(135deg,#fff4d1,#ffd982)',
+    b1: { t: '油皮通勤防晒天花板？真的不搓泥', a: '美妆研究所', likes: '5.1k', days: 38, coop: true, complaints: [['用到第二周开始搓泥了', 1], ['下午T区还是会反光', 1], ['叠粉底有点假白', 0]], e: '☀️', bg: 'linear-gradient(135deg,#fff4d1,#ffd982)',
           body: '本篇为品牌合作。这支防晒成膜很快，号称 30 秒成膜，实测确实不黏手，适合赶时间的通勤族。' },
-    b2: { t: '夏日防晒测评｜成膜速度实测', a: 'Lily护肤日记', likes: '1.2k', days: 45, coop: true, complaints: ['测评只用了一天，参考价值有限', '和我自己用的感受差很多'], e: '🧪', bg: 'linear-gradient(135deg,#ffeedd,#ffc79c)',
+    b2: { t: '夏日防晒测评｜成膜速度实测', a: 'Lily护肤日记', likes: '1.2k', days: 45, coop: true, complaints: [['测评只用了一天，参考价值有限', 0], ['和我自己用的感受差很多', 1]], e: '🧪', bg: 'linear-gradient(135deg,#ffeedd,#ffc79c)',
           body: '本篇为品牌合作。横向对比了 5 款防晒的成膜速度，安澜这支排第二。' },
     b3: { deleted: true },
-    c1: { t: '控油真的绝！大油田救星', a: '油皮小王', likes: '1.8k', days: 9, coop: false, complaints: ['我用了会刺痛', '浓度是不是太高了'], e: '👍', bg: 'linear-gradient(135deg,#e3f6ea,#b6e4c6)',
+    c1: { t: '控油真的绝！大油田救星', a: '油皮小王', likes: '1.8k', days: 9, coop: false, complaints: [['我用了会刺痛', 1], ['浓度是不是太高了', 0]], e: '👍', bg: 'linear-gradient(135deg,#e3f6ea,#b6e4c6)',
           body: '大油田一枚，用了一周，中午不用补妆了！毛孔看起来也细了。不过身边有朋友用了泛红，大家量力而行。' },
-    c2: { t: '踩雷了…用三天脸颊泛红刺痛', a: '芋圆圆', likes: '1.5k', days: 12, coop: false, complaints: ['我也是，停了才好', '烟酰胺不耐受的千万别冲', '一模一样的症状', '早知道先局部试了', '客服说要建立耐受'], e: '👎', bg: 'linear-gradient(135deg,#ffe6dc,#ffbea3)',
+    c2: { t: '踩雷了…用三天脸颊泛红刺痛', a: '芋圆圆', likes: '1.5k', days: 12, coop: false, complaints: [['我也是，停了才好', 1], ['烟酰胺不耐受的千万别冲', 1], ['一模一样的症状', 0], ['早知道先局部试了', 1], ['客服说要建立耐受', 0]], e: '👎', bg: 'linear-gradient(135deg,#ffe6dc,#ffbea3)',
           body: '冲着控油买的，第三天两颊开始发红发烫，停用一周才恢复。建议敏感肌先在耳后试几天。' },
     c3: { t: '建立耐受后再用，我的使用方法', a: '成分党阿杰', likes: '967', days: 20, coop: false, complaints: [], e: '📋', bg: 'linear-gradient(135deg,#eef0ff,#c7cdfb)',
           body: '烟酰胺浓度不低，第一周隔天用、只涂 T 区，第二周再全脸。按这个节奏我没有出现不适。' },
@@ -473,28 +535,56 @@
 
   const recs = [
     { id: 'A', cat: '水乳', name: 'John Jeff 油橄榄水乳', price: 89, emoji: '🫒', thumbBg: 'linear-gradient(135deg,#e3f3d8,#b9dea0)',
-      desc: '清爽不黏腻，多位用户反馈连用 2 周闭口减少', score: 8.7, verified: 12,
+      desc: '清爽不黏腻，多位用户反馈连用 2 周闭口减少', score: 8.7, pct: 87, verified: 12,
+      fresh: [['ok', '价格', '笔记里 ¥89 → 现在 ¥89，没有变'], ['ok', '配方', '成分备案 2025-08 至今没有变更'], ['ok', '在售状态', '官方旗舰店在售，有货']],
       skins: ['油皮', '混合皮', '敏感皮'], scenes: ['日常通勤', '熬夜加班'],
-      meta: { days: 21, coop: false, complaints: [] }, notes: ['a1', 'a2', 'a3'] },
+      meta: { days: 21, coop: false, complaints: [['味道有点冲，上脸前几秒有酒精感', 1]] }, notes: ['a1', 'a2', 'a3'] },
     { id: 'B', cat: '防晒', name: '安澜 清透控油防晒乳', price: 139, emoji: '☀️', thumbBg: 'linear-gradient(135deg,#fff2c9,#ffd77a)',
-      desc: '成膜快、不搓泥，主打油皮夏季日常通勤', score: 6.1,
+      desc: '成膜快、不搓泥，主打油皮夏季日常通勤', score: 6.1, pct: 41,
+      fresh: [['warn', '价格', '笔记里 ¥129 → 现在 ¥139，涨了 ¥10'], ['warn', '配方', '2026-10 配方升级（换了成膜剂），旧笔记写的可能是老配方'], ['ok', '在售状态', '官方旗舰店在售，有货']],
       skins: ['油皮', '混合皮'], scenes: ['日常通勤', '运动健身', '旅行出差'],
-      meta: { days: 38, coop: true, complaints: ['用到第二周开始搓泥了', '下午T区还是会反光', '叠粉底有点假白'] }, notes: ['b1', 'b2', 'b3'] },
+      meta: { days: 38, coop: true, complaints: [['用到第二周开始搓泥了', 1], ['下午T区还是会反光', 1], ['叠粉底有点假白', 0]] }, notes: ['b1', 'b2', 'b3'] },
     { id: 'C', cat: '精华', name: '初研 烟酰胺控油精华', price: 159, emoji: '💧', thumbBg: 'linear-gradient(135deg,#dcecff,#a9cdfa)',
-      desc: '控油效果明显，但耐受差异大', score: 5.4,
+      desc: '控油效果明显，但耐受差异大', score: 5.4, pct: 23,
+      fresh: [['ok', '价格', '笔记里 ¥159 → 现在 ¥159，没有变'], ['ok', '配方', '成分备案 2026-01 至今没有变更'], ['ok', '在售状态', '官方旗舰店在售，近期有满减']],
       skins: ['油皮'], scenes: ['日常通勤'],
-      meta: { days: 9, coop: false, complaints: ['用三天脸颊泛红刺痛', '停用一周才恢复', '烟酰胺不耐受的千万别冲', '浓度太高了', '用了会刺痛', '敏感肌慎入', '早知道先局部试了'] }, notes: ['c1', 'c2', 'c3'] },
+      meta: { days: 9, coop: false, complaints: [['用三天脸颊泛红刺痛', 1], ['停用一周才恢复', 1], ['烟酰胺不耐受的千万别冲', 1], ['浓度太高了', 0], ['用了会刺痛', 1], ['敏感肌慎入', 0], ['早知道先局部试了', 1]] }, notes: ['c1', 'c2', 'c3'] },
     { id: 'D', cat: '乳液', name: '禾初 积雪草舒缓乳', price: 75, emoji: '🌱', thumbBg: 'linear-gradient(135deg,#e5f6ee,#bfe8d3)',
       desc: '新上市，主打敏感肌舒缓，相关笔记还很少', score: null,
+      fresh: [['ok', '价格', '首发价 ¥75，没有变'], ['muted', '配方', '新品，暂无历史配方可以对比'], ['ok', '在售状态', '官方旗舰店在售，有货']],
       skins: ['敏感皮', '干皮'], scenes: ['日常通勤'],
       meta: { days: null, coop: null, complaints: null }, notes: ['d1', 'd2'] }
   ];
 
   const verify = {
-    A: { list: [['ok', '12 个网友都晒过购买记录'], ['ok', '评论区互动自然，不像批量刷的'], ['ok', '不是复制粘贴的套路文案'], ['ok', '12 个不同网友都说过类似体验']] },
-    B: { list: [['warn', '只有 2 个网友晒过购买记录'], ['ok', '评论区互动自然，不像批量刷的'], ['warn', '7 篇合作笔记说法很像，有套路文案的痕迹'], ['bad', '只有 2 个不同网友说过类似体验，还不够多']] },
-    C: { list: [['ok', '15 个网友都晒过购买记录'], ['ok', '评论区互动自然，不像批量刷的'], ['ok', '不是复制粘贴的套路文案'], ['bad', '说好用和说踩雷的人差不多各一半']], split: [52, 7, 41] },
-    D: { insufficient: true, list: [['muted', '只有 2 篇笔记提到它，还看不出靠不靠谱']] }
+    // [状态, 大白话结论, 可验证的数据锚点]
+    A: { list: [
+      ['ok', '12 个网友都晒过购买记录', '12 张订单截图已和平台交易记录逐一比对，全部对得上'],
+      ['ok', '评论区互动自然，不像批量刷的', '近 30 天该账号互动分布与同类用户 P80 区间匹配'],
+      ['ok', '不是复制粘贴的套路文案', '与站内同品类笔记文本相似度低于 15%'],
+      ['ok', '12 个不同网友都说过类似体验', '12 位用户分属不同社交圈，无互关关系']] },
+    B: { list: [
+      ['warn', '只有 2 个网友晒过购买记录', '9 篇相关笔记里只有 2 篇附了能核验的订单'],
+      ['ok', '评论区互动自然，不像批量刷的', '近 30 天该账号互动分布与同类用户 P75 区间匹配'],
+      ['warn', '7 篇合作笔记说法很像，有套路文案的痕迹', '7 篇合作笔记之间文本相似度 62%，站内同品类平均 12%'],
+      ['bad', '只有 2 个不同网友说过类似体验，还不够多', '独立用户 2 位，低于可信门槛 5 位']] },
+    C: { list: [
+      ['ok', '15 个网友都晒过购买记录', '15 张订单截图已和平台交易记录逐一比对，全部对得上'],
+      ['ok', '评论区互动自然，不像批量刷的', '近 30 天该账号互动分布与同类用户 P80 区间匹配'],
+      ['ok', '不是复制粘贴的套路文案', '与站内同品类笔记文本相似度低于 12%'],
+      ['bad', '说好用和说踩雷的人差不多各一半', '29 篇笔记：说好用 15 篇 / 说踩雷 12 篇 / 说不清 2 篇']], split: [52, 7, 41] },
+    D: { insufficient: true, list: [['muted', '只有 2 篇笔记提到它，还看不出靠不靠谱', '站内相关笔记 2 篇，低于最低样本量 5 篇']] }
+  };
+
+  // 验证用户（匿名化，只展示部分）
+  const verifiedUsers = {
+    A: { summary: ['12/12 已验证购买', '彼此无互关', '粉丝 58 ~ 2.3 万不等'], list: [
+      { n: '橘**', skin: '混油敏感肌', fans: '2.3 万', cats: 5, days: 21, say: '连用 21 天闭口变少了', note: 'a1' },
+      { n: 'Mo**', skin: '混油皮', fans: '3,412', cats: 7, days: 14, say: '夏天也不闷，T 区下午会有点油', note: 'a2' },
+      { n: '阿*', skin: '敏感肌', fans: '860', cats: 4, days: 14, say: '泛红期用也没刺激，保湿中等', note: 'a3' },
+      { n: '小**', skin: '油皮', fans: '126', cats: 3, days: 30, say: '空了一瓶，已回购' },
+      { n: 'Ch**', skin: '油痘肌', fans: '1.1 万', cats: 6, days: 45, say: '控油一般，但确实不闷痘' },
+      { n: '一**', skin: '混合皮', fans: '58', cats: 2, days: 10, say: '质地清爽，学生党友好' }] }
   };
 
   const praise = ['同款油皮，确实清爽', '收藏了，准备入', '请问敏感肌能用吗？', '已下单，坐等到货'];
@@ -552,26 +642,38 @@
       const m = Math.floor(days / 30);
       return { text: short ? `${m} 个月前 · 可能已过期` : `${m} 个月前发布（信息可能已过期）`, stale: true };
     }
-    return { text: short ? `${days} 天前` : `${days} 天前发布`, stale: false };
+    return { text: short ? `${days} 天前 · 价格/配方可能变动` : `${days} 天前发布`, stale: false };
   }
 
-  function metaTagsHTML(m, short) {
+  const recOfNote = nid => recs.find(r => r.notes.includes(nid));
+
+  function complaintsBoxHTML(list) {
+    const ok = list.filter(c => c[1]).length;
+    return `<div class="complaints"><div class="cp-h">吐槽原文（来自评论区，不隐藏、不过滤）· ${ok}/${list.length} 条来自已验证购买者</div>
+      ${list.map(c => `<div class="cp"><div class="cp-t">“${c[0]}”</div>
+        <div class="cp-v ${c[1] ? 'ok' : 'no'}">${c[1] ? '✓ 已验证该用户为真实购买者' : '未查到购买记录，仅供参考'}</div></div>`).join('')}</div>`;
+  }
+
+  function metaTagsHTML(m, short, rid) {
     const t = timeLabel(m.days, short);
+    const time = m.days == null ? '<span class="mt">🕒 —</span>'
+      : `<button class="mt time ${t.stale ? 'stale' : ''}" onclick="openFresh(event, '${rid}')">🕒 ${t.text} ›</button>`;
     const coop = m.coop == null ? '<span class="mt">—</span>'
       : m.coop ? '<span class="mt coop">🏷️ 品牌合作</span>' : '<span class="mt">无合作标识</span>';
     let comp;
     if (m.complaints == null) comp = '<span class="mt">—</span>';
     else if (!m.complaints.length) comp = '<span class="mt good">无负面反馈</span>';
-    else comp = `<button class="mt bad" onclick="toggleComplaints(event, this)"><i class="dot"></i>有 ${m.complaints.length} 条吐槽 <em>▾</em></button>`;
-    const box = m.complaints && m.complaints.length
-      ? `<div class="complaints"><div class="cp-h">吐槽内容（来自评论区）</div>${m.complaints.map(c => `<div class="cp">“${c}”</div>`).join('')}</div>` : '';
-    return `<div class="meta-wrap"><div class="meta-tags"><span class="mt ${t.stale ? 'stale' : ''}">🕒 ${t.text}</span>${coop}${comp}</div>${box}</div>`;
+    else comp = `<button class="mt bad" onclick="toggleComplaints(event, this, '${rid}')"><i class="dot"></i><u>有 ${m.complaints.length} 条吐槽</u> <em>▾</em></button>`;
+    const box = m.complaints && m.complaints.length ? complaintsBoxHTML(m.complaints) : '';
+    return `<div class="meta-wrap"><div class="meta-tags">${time}${coop}${comp}</div>${box}</div>`;
   }
 
-  function toggleComplaints(e, btn) {
+  function toggleComplaints(e, btn, rid) {
     e.stopPropagation();
     btn.classList.toggle('open');
-    btn.closest('.meta-wrap').querySelector('.complaints').classList.toggle('show');
+    const box = btn.closest('.meta-wrap').querySelector('.complaints');
+    box.classList.toggle('show');
+    if (box.classList.contains('show')) track('expand_complaints', { rec_id: rid, count: box.querySelectorAll('.cp').length });
   }
 
   /* ================= 页面1：列表 ================= */
@@ -604,7 +706,7 @@
         </div>
       </div>
       <button class="trust ${tr.cls}" onclick="openCred('${r.id}', ${idx + 1})">${shieldIcon}<span>${tr.text}</span><em>看依据 ›</em></button>
-      ${metaTagsHTML(r.meta, false)}
+      ${metaTagsHTML(r.meta, false, r.id)}
       <div class="fb-row">${fbRowHTML(r.id)}</div>
     </div>`;
   }
@@ -674,9 +776,11 @@
   }
 
   function verifyHTML(rid) {
-    const v = verify[rid];
+    const v = verify[rid], r = recById(rid);
     let html = v.insufficient ? '<div class="insufficient">📭 这条推荐的验证数据还不够多，建议多对比几条</div>' : '';
-    html += `<ul class="checks">${v.list.map(c => `<li><span class="ck ${c[0]}">${c[0] === 'ok' ? '✓' : '!'}</span>${c[1]}</li>`).join('')}</ul>`;
+    html += `<ul class="checks">${v.list.map((c, i) => `<li><span class="ck ${c[0]}">${c[0] === 'ok' ? '✓' : '!'}</span>
+      <div class="ck-main"><div>${c[1]}</div>${c[2] ? `<div class="anchor">📊 ${c[2]}</div>` : ''}
+      ${i === 0 && verifiedUsers[rid] ? `<button class="link anchor-link" onclick="openUsers('${rid}')">看看是哪 ${r.verified} 位 ›</button>` : ''}</div></li>`).join('')}</ul>`;
     if (v.split) html += `
       <div class="split">
         <i style="width:${v.split[0]}%;background:var(--green)"></i><i style="width:${v.split[1]}%;background:#c4c4c8"></i><i style="width:${v.split[2]}%;background:var(--low)"></i>
@@ -693,11 +797,27 @@
       <div class="src-cover" style="background:${n.bg}">${n.e}</div>
       <div class="src-main">
         <div class="src-title">${n.t}</div>
-        ${metaTagsHTML(n, true)}
+        ${metaTagsHTML(n, true, recOfNote(id).id)}
         <div class="src-author">${avatar(n.a)}<span>${n.a}</span><span class="likes">♡ ${n.likes} 赞</span></div>
       </div>
       <span class="chev">›</span>
     </div>`;
+  }
+
+  function trustBadgeHTML(r, tr) {
+    if (verifiedUsers[r.id]) return `<button class="trust-inline ${tr.cls} clickable" onclick="openUsers('${r.id}')">${tr.text} <b>›</b></button>`;
+    return `<span class="trust-inline ${tr.cls}">${tr.text}</span>`;
+  }
+
+  function credFbHTML(rid, picking) {
+    const fb = state.feedback[rid];
+    const close = `<button class="btn-primary" onclick="closeCred(this)">关闭</button>`;
+    if (fb) return `<div class="foot-btns"><div class="cf-done">✓ 已反馈：${fb.v === 'up' ? '有帮助' : `没帮助（${fb.reason}）`}</div>${close}</div>`;
+    const reasons = picking ? `<div class="cf-reasons"><span>哪里没帮助？</span>${['信息过时了', '不适合我', '感觉是广告'].map(x => `<button class="pchip" onclick="credPick('${rid}', '${x}')">${x}</button>`).join('')}</div>` : '';
+    const err = state.fbError[rid] ? '<div class="cf-err">⚠ 反馈失败，请重试</div>' : '';
+    return `${reasons}${err}<div class="foot-btns">
+      <button class="btn-ghost cf" onclick="credFb('${rid}', 'up')">👍 有帮助</button>
+      <button class="btn-ghost cf ${picking ? 'on' : ''}" onclick="credFb('${rid}', 'down')">👎 没帮助</button>${close}</div>`;
   }
 
   function sheetHTML(rid) {
@@ -706,23 +826,78 @@
       <div class="sheet-head">
         <div class="sheet-grip"></div>
         <div class="sheet-title">这条推荐为什么可信？</div>
-        <div class="sheet-sub">${r.name}<span class="trust-inline ${tr.cls}">${tr.text}</span></div>
+        <div class="sheet-sub">${r.name}${trustBadgeHTML(r, tr)}</div>
         <button class="sheet-close" onclick="closeCred(this)">✕</button>
       </div>
       <div class="sheet-body">
         ${matchHTML(r)}
-        <div class="sec-title">大家怎么说</div>
+        <div class="sec-title">大家怎么说 <span>每条都附可核验的数据</span></div>
         ${verifyHTML(rid)}
-        <div class="sec-title">引用的笔记 <span>共 ${r.notes.length} 篇 · 点击看原文</span></div>
+        <div class="sec-title">引用的笔记 <button class="link" onclick="viewAll(this, '${rid}')">共 ${r.notes.length} 篇 · 查看全部 ›</button></div>
         <div>${r.notes.map(noteRowHTML).join('')}</div>
       </div>
       <div class="sheet-foot">
-        <div class="foot-btns">
-          <button class="btn-ghost" onclick="viewAll(this, '${rid}')">查看全部</button>
-          <button class="btn-primary" onclick="closeCred(this)">关闭</button>
-        </div>
-        <div class="algo-note">${r.score != null ? `参考分 ${r.score}/10 · ` : ''}由算法综合购买记录、互动情况、原创程度、多人佐证计算，仅供参考</div>
+        <div class="cred-fb">${credFbHTML(rid)}</div>
+        <div class="algo-note">${r.score != null ? `<div class="score-anchor">参考分 ${r.score}/10 · 高于 ${r.pct}% 的同类推荐<i class="mini-bar"><b style="width:${r.pct}%"></b></i></div>` : ''}由算法综合购买记录、互动情况、原创程度、多人佐证计算，仅供参考</div>
       </div>`;
+  }
+
+  /* ---- 第二层：验证用户 ---- */
+  function openUsers(rid) {
+    const r = recById(rid), u = verifiedUsers[rid], ph = phone1();
+    ph.querySelector('.sheet-users').innerHTML = `
+      <div class="sheet-head">
+        <div class="sheet-grip"></div>
+        <div class="sheet-title">这 ${r.verified} 位用户是谁？</div>
+        <div class="sheet-sub">已隐去昵称和头像，背景信息给你自己判断</div>
+        <button class="sheet-close" onclick="closeUsers()">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="u-sum">${u.summary.map(s => `<span>${s}</span>`).join('')}</div>
+        ${u.list.map(x => `<div class="u-card">
+          <div class="u-av">匿</div>
+          <div class="u-main">
+            <div class="u-name">用户 ${x.n}<span>${x.skin} · 用了 ${x.days} 天</span></div>
+            <div class="u-tags"><span class="ut ok">✓ 已验证购买</span><span class="ut">粉丝 ${x.fans}</span><span class="ut">历史内容覆盖 ${x.cats} 个品类</span></div>
+            <div class="u-say">“${x.say}”</div>
+          </div>
+          ${x.note ? `<button class="link u-go" onclick="openNote(this, '${x.note}')">看原帖 ›</button>` : ''}
+        </div>`).join('')}
+        <div class="u-more">仅展示 ${u.list.length} 位 · 其余 ${r.verified - u.list.length} 位未公开主页</div>
+      </div>
+      <div class="sheet-foot"><button class="btn-primary" onclick="closeUsers()">返回</button></div>`;
+    ph.classList.add('open-mask2');
+    ph.querySelector('.sheet-users').classList.add('show');
+    track('open_verified_users', { rec_id: rid, shown: u.list.length });
+  }
+  function closeUsers() {
+    const ph = phone1();
+    ph.querySelector('.sheet-users').classList.remove('show');
+    ph.classList.remove('open-mask2');
+  }
+
+  /* ---- 时效性：产品信息是否仍有效 ---- */
+  function openFresh(e, rid) {
+    e.stopPropagation();
+    const r = recById(rid), ph = phone1();
+    const warn = r.fresh.filter(f => f[0] === 'warn').length;
+    const L = ph.querySelector('.layer-fresh');
+    L.innerHTML = `${statusbar()}
+      <div class="navbar">
+        <span class="back" onclick="closeLayer(this)">‹</span>
+        <div class="title center">产品信息还有效吗？</div><span class="more"></span>
+      </div>
+      <div class="scroll">
+        <div class="fr-head">
+          <div class="rec-thumb" style="background:${r.thumbBg}">${r.emoji}</div>
+          <div><div class="nm">${r.name}</div><div class="sub">🕒 今天 08:00 最新核验</div></div>
+        </div>
+        <div class="fr-sum ${warn ? 'warn' : 'ok'}">${warn ? `⚠ 有 ${warn} 项发生了变动，旧笔记里的说法仅供参考` : '✓ 核心信息没有变，笔记内容仍可参考'}</div>
+        <ul class="checks fr-list">${r.fresh.map(f => `<li><span class="ck ${f[0]}">${f[0] === 'ok' ? '✓' : '!'}</span><div class="ck-main"><div>${f[1]}</div><div class="anchor">${f[2]}</div></div></li>`).join('')}</ul>
+        <div class="algo-note" style="margin-top:12px">数据来源：品牌官方旗舰店在售价格、化妆品备案公开信息（原型中为示意数据）</div>
+      </div>`;
+    L.classList.add('show');
+    track('click_freshness', { rec_id: rid, changed: warn });
   }
 
   function openCred(rid, pos) {
@@ -749,7 +924,7 @@
   function noteHTML(id) {
     const n = notes[id];
     const cmts = praise.slice(0, 2).map((t, i) => ({ u: ['小鹿不迷路', '一颗橙子'][i], t, neg: false }))
-      .concat((n.complaints || []).map((t, i) => ({ u: ['芝士莓莓', '早睡选手', '路过的猫', '阿Q', '南风'][i % 5], t, neg: true })));
+      .concat((n.complaints || []).map((c, i) => ({ u: ['芝士莓莓', '早睡选手', '路过的猫', '阿Q', '南风'][i % 5], t: c[0], neg: true, buyer: c[1] })));
     const negN = (n.complaints || []).length;
     return `${statusbar()}
       <div class="navbar note-nav">
@@ -762,10 +937,10 @@
         <div class="note-content">
           <div class="n-title">${n.t}</div>
           <div class="n-body">${n.body}</div>
-          <div class="n-meta">${metaTagsHTML(n, false)}</div>
+          <div class="n-meta">${metaTagsHTML(n, false, recOfNote(id).id)}</div>
         </div>
         <div class="n-cmt-h">共 ${cmts.length} 条评论${negN ? ` · 其中 ${negN} 条吐槽` : ''}</div>
-        ${cmts.map(c => `<div class="n-cmt">${avatar(c.u)}<div><div class="u">${c.u}${c.neg ? '<span class="neg-tag">吐槽</span>' : ''}</div><div class="c">${c.t}</div></div></div>`).join('')}
+        ${cmts.map(c => `<div class="n-cmt">${avatar(c.u)}<div><div class="u">${c.u}${c.neg ? `<span class="neg-tag">吐槽</span><span class="cp-v ${c.buyer ? 'ok' : 'no'}">${c.buyer ? '✓ 已验证购买' : '未查到购买记录'}</span>` : ''}</div><div class="c">${c.t}</div></div></div>`).join('')}
         <div style="height:40px"></div>
       </div>`;
   }
@@ -816,17 +991,45 @@
     showSheet(ph, '.sheet-fb');
   }
   function pickReason(reason) {
-    const ph = phone1(), id = state.fbTarget;
+    hideAll(phone1());
+    recordDown(state.fbTarget, reason, 'card');
+  }
+  function recordDown(id, reason, from) {
+    const ph = phone1();
     state.feedback[id] = { v: 'down', reason };
     state.downStreak++;
-    track('select_feedback_reason', { rec_id: id, reason });
-    hideAll(ph);
+    track('select_feedback_reason', { rec_id: id, reason, from });
     rerenderFb(id);
     toast(ph, '感谢反馈，我们会优化推荐');
     if (state.downStreak >= 2) {
       state.downStreak = 0;
       setTimeout(() => { ph.classList.add('open-mask'); $('#streakDialog').classList.add('show'); }, 1500);
     }
+  }
+
+  /* ---- 弹窗底部的反馈 ---- */
+  function renderCredFb(rid, picking) {
+    const el = phone1().querySelector('.sheet-cred .cred-fb');
+    if (el) el.innerHTML = credFbHTML(rid, picking);
+  }
+  function credFb(rid, v) {
+    const result = v === 'up' ? 'useful' : 'useless';
+    if (!navigator.onLine) {
+      state.fbError[rid] = true; renderCredFb(rid); rerenderFb(rid);
+      track('click_feedback', { rec_id: rid, result, from: 'popup', status: 'failed' });
+      return;
+    }
+    state.fbError[rid] = false;
+    track('click_feedback', { rec_id: rid, result, from: 'popup' });
+    if (v === 'down') { renderCredFb(rid, true); return; }
+    state.feedback[rid] = { v: 'up' };
+    state.downStreak = 0;
+    renderCredFb(rid); rerenderFb(rid);
+    toast(phone1(), '感谢反馈');
+  }
+  function credPick(rid, reason) {
+    recordDown(rid, reason, 'popup');
+    renderCredFb(rid);
   }
 
   /* ================= 偏好设置 ================= */
@@ -886,7 +1089,7 @@
   }
   function hideAll(ph) {
     ph.querySelectorAll('.sheet:not(.static), .dialog').forEach(s => s.classList.remove('show'));
-    ph.classList.remove('open-mask');
+    ph.classList.remove('open-mask', 'open-mask2');
   }
   function onMask(mask) {
     const ph = mask.closest('.phone');
@@ -943,7 +1146,7 @@
   /* ================= 初始化 ================= */
   // 注入二级页面容器与 toast
   phone1().insertAdjacentHTML('beforeend',
-    '<div class="layer layer-note"></div><div class="layer layer-prefs prefs-root"></div><div class="toast"></div>');
+    '<div class="layer layer-note"></div><div class="layer layer-prefs prefs-root"></div><div class="layer layer-fresh"></div><div class="toast"></div>');
 
   // 反馈入口：卡片滑入可视区后才出现
   observer = new IntersectionObserver(entries => {
