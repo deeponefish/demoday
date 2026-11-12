@@ -504,7 +504,31 @@
     .phone { width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; box-shadow: none; }
     .phone .statusbar { display: none; }
   }
+
+  /* ---------- 全页面总览：多台手机并排，每台都是可交互的 iframe ---------- */
+  html.gallery .canvas { display: none; }
+  body.embed .phone .statusbar { display: flex; }
+  .gal { --s: .8; padding: 28px 32px 60px; }
+  .gal-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+  .gal-head h1 { font-size: 20px; margin: 0; }
+  .gal-head p { margin: 0; font-size: 13px; color: var(--text-3); }
+  .gal-zoom { margin-left: auto; display: flex; gap: 4px; }
+  .gal-zoom button { border: 1px solid var(--line); background: var(--card); color: var(--text-2); border-radius: 14px; padding: 3px 11px; font-size: 12.5px; cursor: pointer; }
+  .gal-zoom button.on { border-color: var(--red); color: var(--red); }
+  .gal-grp { margin-bottom: 30px; }
+  .gal-grp h2 { font-size: 14px; font-weight: 600; color: var(--text-2); margin: 0 0 14px; }
+  .gal-row { display: flex; flex-wrap: wrap; gap: 28px 26px; }
+  .gal-item { width: calc(375px * var(--s)); }
+  .gal-cap { font-size: 13.5px; font-weight: 600; margin-bottom: 3px; }
+  .gal-cap b { display: inline-block; min-width: 20px; height: 20px; line-height: 20px; text-align: center; border-radius: 10px; background: var(--red); color: #fff; font-size: 11.5px; margin-right: 6px; }
+  .gal-how { font-size: 12px; color: var(--text-3); margin-bottom: 10px; line-height: 1.5; min-height: 36px; }
+  .gal-frame { width: calc(375px * var(--s)); height: calc(812px * var(--s)); border-radius: calc(44px * var(--s)); overflow: hidden; box-shadow: 0 0 0 calc(8px * var(--s)) #111, 0 14px 40px rgba(0,0,0,.2); background: var(--bg); }
+  .gal-frame iframe { width: 375px; height: 812px; border: 0; display: block; transform: scale(var(--s)); transform-origin: 0 0; }
 </style>
+<script>
+  // 宽屏且没指定 view 时显示全页面总览；?view=main 可只看单台手机
+  if (!new URLSearchParams(location.search).get('view') && innerWidth > 500) document.documentElement.classList.add('gallery');
+</script>
 </head>
 <body>
 
@@ -1412,6 +1436,47 @@
   renderAll();
   drawBrand();
   if (location.hash === '#internal') showInternal();
+
+  /* ================= 全页面总览 ================= */
+  const noop = { stopPropagation() {} };
+  const scrollTo = sel => { const s = $('#scroll1'), el = document.querySelector(sel); s.scrollTop += el.getBoundingClientRect().top - s.getBoundingClientRect().top - 12; };
+  const VIEWS = [
+    ['主流程', [
+      ['main', '点点回答', '入口页：段落式回答，标题旁是来源标签', () => {}],
+      ['sources', '参考来源', '点顶部「参考 22 人经验 ›」', () => openSources()],
+      ['note', '原文笔记', '点产品名旁的来源标签 / 引用 / 笔记图', () => openNote(document.body, 'b1', 'source_tag')],
+      ['fresh', '产品信息变化', '点安澜段落里的「看产品信息变化 ›」', () => openFresh(noop, 'B')]]],
+    ['可信度验证', [
+      ['verify', '验证面板 · 正常', '点「这条推荐为什么可信？」展开', () => { toggleVerify('A'); setTimeout(() => scrollTo('.vp[data-rid="A"]'), 520); }],
+      ['verifyD', '验证面板 · 样本不足', '新品 D 数据不够时不编造', () => { toggleVerify('D'); setTimeout(() => scrollTo('.prod[data-id="D"] .covers'), 520); }],
+      ['users', '这 12 位是谁', '验证面板里点「这 12 位是谁 ›」', () => openUsers('A')],
+      ['userhome', '用户主页', '用户列表里点某一位', () => openUserHome('A', 0)],
+      ['cred', '完整推荐依据', '点产品名，或面板里的「完整依据 ›」', () => openCred('A')]]],
+    ['反馈与设置', [
+      ['feedback', '回答反馈 / 举报', '点回答底部的 👎', () => fbDown('answer')],
+      ['prefs', '偏好设置', '点开头的「改偏好」', () => openPrefs($('#refLine'))],
+      ['internal', '品牌诊断（内部）', '连点 3 次「点点」标题', () => showInternal()]]]
+  ];
+  const VIEW = new URLSearchParams(location.search).get('view');
+  if (VIEW) {
+    document.body.classList.add('embed');
+    const v = VIEWS.flatMap(g => g[1]).find(x => x[0] === VIEW);
+    if (v) v[3]();
+  } else if (document.documentElement.classList.contains('gallery')) {
+    const base = location.pathname.split('/').pop();
+    const zooms = [[.6, '60%'], [.8, '80%'], [1, '100%']];
+    document.body.insertAdjacentHTML('beforeend', `<div class="gal">
+      <div class="gal-head"><h1>点点推荐可信度 · 全部页面</h1><p>每台手机都能直接点；<a href="?view=main">只看单台手机</a></p>
+        <div class="gal-zoom">${zooms.map(z => `<button class="${z[0] === .8 ? 'on' : ''}" onclick="galZoom(this, ${z[0]})">${z[1]}</button>`).join('')}</div></div>
+      ${VIEWS.map(g => `<div class="gal-grp"><h2>${g[0]}</h2><div class="gal-row">${g[1].map(v => `
+        <div class="gal-item"><div class="gal-cap"><b>${VIEWS.flatMap(x => x[1]).indexOf(v) + 1}</b>${v[1]}</div><div class="gal-how">${v[2]}</div>
+          <div class="gal-frame"><iframe src="${base}?view=${v[0]}" loading="lazy" title="${v[1]}"></iframe></div></div>`).join('')}</div></div>`).join('')}
+    </div>`);
+  }
+  function galZoom(btn, s) {
+    document.querySelector('.gal').style.setProperty('--s', s);
+    document.querySelectorAll('.gal-zoom button').forEach(b => b.classList.toggle('on', b === btn));
+  }
 </script>
 </body>
 </html>
